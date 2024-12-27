@@ -1,4 +1,8 @@
-# Data Science Interview Questions by @AIinMinutes
+# Data Science Concepts and Interview Questions by @AIinMinutes
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=AIinMinutes/Data-Science-IQs&type=Date)](https://star-history.com/#AIinMinutes/Data-Science-IQs&Date)
 
 This repository contains a curated collection of data science interview questions, shared on my Threads page [@AIinMinutes](https://www.threads.net/@AIinMinutes). Topics range from foundational mathematics to cutting-edge deep learning concepts, aiming to support learners and professionals preparing for data science roles.
 
