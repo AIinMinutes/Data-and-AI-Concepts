@@ -208,3 +208,53 @@ Q86: How is Principal Component Analysis used for Multivariate Anomaly Detection
 Q87: How is AutoEncoder used for Dimensionality Reduction (onto Latent Space)? 
 
 Q88: What is the loss function used in Variational AutoEncoders?
+
+Q89: How is a Variational Autoencoder (VAE) trained, and how does its latent space differ from that of an Autoencoder (AE)?
+
+Q90: How do you calculate the distance between two parallel hyperplanes?
+
+Q91: How do quadratic forms (energy) relate to a matrix’s definiteness, and what does this reveal about its behavior?
+
+Q92: What does the norm of a vector represent?
+
+Q93: What does the inner product of two vectors represent, and how is it related to the kernel trick?
+
+Q94: What is Singular Value Decomposition? How is it related to rank one matrices?
+
+Q95: What is a generative model? How is it different from a classification model?
+
+Q96: How do you solve an over(under)-determined system of linear equations?
+
+Q97: What is Huber Loss, and why is it preferred over Mean Squared Error (MSE) in the presence of outliers?
+
+Q98: How does the Jacobian come into play when calculating the gradient of a scalar loss function with matrix parameters?
+
+Q99:Does the perplexity of predictions decrease or increase with increasing context size?
+
+Q100: In a logistic regression model, what is the interpretation of the coefficient of a predictor (assuming it is not part of any interaction term)? What does this coefficient represent?
+
+Q101: How do shrinkage methods address multi-collinearity in linear regression?
+
+Q102: How are single linkage and complete linkage different in the context of Agglomerative clustering
+
+Q103: Question-103: Why do we perform eigenvalue decomposition of the sample covariance matrix to identify principal components?
+
+Q104: Do all orthogonal matrices perform rotational transformation preserving norm and orientation?
+
+Q105: Are factor loadings in an orthogonal factor analysis model unique, or do they change with different rotations?
+
+Q106: Why is causal attention used in autoregressive language models such as GPT?
+
+Q107: Let's say you want to evaluate the association between two sets of variables in a dataset.For example, one set contains BMI and Weight, while the other set contains Systolic BP, Blood Urea, and LDL Cholesterol.Which analysis technique(s) can you use?
+
+Q108: Let's say you want to visually explore the relationship between two nominal variables. Which analysis(es) will you perform?
+
+Q109: How does using multiple attention heads improve the performance of transformers?
+
+Q110: How does RMS Normalization differ from Layer Normalization?
+
+Q111: If A is a matrix of any shape with all real elements, how are its singular values related to the eigenvalues of A'A?
+
+Q112:  How is the greedy search decoding strategy different from the beam search decoding strategy?
+
+Q113: Why does Gini impurity favor the majority class in classification compared to entropy?
