@@ -1,6 +1,6 @@
-# Data Science Concepts and IQs by @AIinMinutes 🎯
+# Data and AI concepts and IQs by @AIinMinutes 🎯
 
-This repository contains a curated collection of data science concepts and [IQs](IQs.md), shared on my Threads page [@AIinMinutes](https://www.threads.net/@AIinMinutes). Topics range from foundational mathematics to cutting-edge generative AI concepts, aiming to support learners and professionals preparing for various data science roles. 📚
+This repository contains a curated collection of data science/analysis and AI concepts and [IQs](IQs.md), shared on my Threads page [@AIinMinutes](https://www.threads.net/@AIinMinutes). Topics range from foundational mathematics to cutting-edge generative AI concepts, aiming to support learners and professionals preparing for various data science roles. 📚
 
 ## Generative AI 🤖
 
