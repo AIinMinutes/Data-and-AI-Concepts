@@ -56,6 +56,7 @@ This repository contains a curated collection of data science/analysis and AI co
 | Concept # | Concept Name | Notebook |
 |-----------|--------------|----------|
 | 1 | Logistic Regression Coefficient Interpretation | [View Notebook](interpretable-ai/logistic_regression.ipynb) |
+| 2 | Shapley values and SHAP for ML | [View Notebook](interpretable-ai/shapley.ipynb) |
 
 ## Applied Statistics 📊
 
