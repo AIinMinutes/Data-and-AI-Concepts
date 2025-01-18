@@ -70,6 +70,7 @@ This repository contains a curated collection of data science/analysis and AI co
 | 6 | Kendall's Tau Rank Correlation | [View Notebook](applied-statistics/kruskal_wallis.ipynb) |
 | 7 | Kruskal Wallis | [View Notebook](applied-statistics/kruskal_wallis.ipynb) |
 | 8 | Spurious Correlation | [View Notebook](applied-statistics/spurious_correlation.ipynb) |
+| 9 | Leave One Out Cross Validation and PRESS | [View Notebook](applied-statistics/predictive_r2.ipynb) |
 
 ## Multivariate Statistics 📈
 
