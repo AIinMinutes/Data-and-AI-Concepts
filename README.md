@@ -115,7 +115,7 @@ This repository contains a curated collection of data science/analysis and AI co
 | 1 | Plotnine: Python's ggplot2 | [View Notebook](visualization/plotnine.ipynb) |
 
 ## Current Concept and IQ Generating Process 🔄
-Currently, I follow a simple format to disseminate knowledge on Threads. I post random interesting questions (IQs) (as they come to my ENTP brain) that I have been asked or that I could potentially ask in a data science interview. Once I have a question ready, I refine it to cover as many concepts as possible. Sometimes, I choose questions that are particularly thought-provoking to stimulate deeper discussions.
+Currently, I follow a simple format to disseminate knowledge on Threads. I post concepts and interesting questions (IQs) as they come to my ENTP brain, which I have used in my professional journey and academia, have been asked in interviews, or that I could potentially ask in a data science interview. Once I have a question ready, I refine it to cover as many concepts as possible. Sometimes, I choose questions that are particularly thought-provoking to stimulate deeper discussions.
 
 ## Star History ⭐
 
