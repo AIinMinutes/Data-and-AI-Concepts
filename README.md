@@ -57,6 +57,7 @@ This repository contains a curated collection of data science/analysis and AI co
 |-----------|--------------|----------|
 | 1 | Logistic Regression Coefficient Interpretation | [View Notebook](interpretable-ai/logistic_regression.ipynb) |
 | 2 | Shapley values and SHAP for ML | [View Notebook](interpretable-ai/shapley.ipynb) |
+| 3 | Counterfactuals | [View Notebook](interpretable-ai/model_counterfactuals.ipynb) |
 
 ## Applied Statistics 📊
 
