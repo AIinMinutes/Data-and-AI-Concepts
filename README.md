@@ -94,6 +94,7 @@ This repository contains a curated collection of data science/analysis and AI co
 | 5 | Mutual Information | [View Notebook](mathematical-statistics/mutual_information.ipynb) |
 | 6 | Point Biserial Correlation Coefficient | [View Notebook](mathematical-statistics/point_biserial.ipynb) |
 | 7 | Unbiasesd vs Consistent Estimator | [View Notebook](mathematical-statistics/unbiased_vs_consistent.ipynb) |
+| 8 | ECDF | [View Notebook](mathematical-statistics/ecdf.ipynb) |
 
 ## Prerequisite Mathematics ➗
 
