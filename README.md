@@ -96,6 +96,11 @@ This repository contains a curated collection of data science/analysis and AI co
 | 7 | Unbiasesd vs Consistent Estimator | [View Notebook](mathematical-statistics/unbiased_vs_consistent.ipynb) |
 | 8 | ECDF | [View Notebook](mathematical-statistics/ecdf.ipynb) |
 
+## Graph Data Science 🌐
+| Concept # | Concept Name | Notebook |
+|-----------|--------------|----------|
+| 1 | User Item Interaction Matrix| [View Notebook](graph-data-science/user_item_interaction_matrix.ipynb) |
+
 ## Prerequisite Mathematics ➗
 
 | Concept # | Concept Name | Notebook |
