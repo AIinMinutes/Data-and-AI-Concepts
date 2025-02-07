@@ -2,6 +2,8 @@
 
 This repository contains a curated collection of data science/analysis and AI concepts and [IQs](IQs.md), shared on my Threads page [@AIinMinutes](https://www.threads.net/@AIinMinutes). Topics range from foundational mathematics to cutting-edge generative AI concepts, aiming to support learners and professionals preparing for various data science roles. 📚
 
+The book based on this repo is currently under development. Check it out here: [AI in Minutes](https://aiinminutes.github.io/content/intro.html).
+
 ## Generative AI 🤖
 
 | Concept # | Concept Name | Notebook |
@@ -122,7 +124,7 @@ This repository contains a curated collection of data science/analysis and AI co
 | 1 | Plotnine: Python's ggplot2 | [View Notebook](visualization/plotnine.ipynb) |
 
 ## Current Concept and IQ Generating Process 🔄
-Currently, I follow a simple format to disseminate knowledge on Threads. I post concepts and interesting questions (IQs) as they come to my ENTP brain, which I have used in my professional journey and academia, have been asked in interviews, or that I could potentially ask in a data science interview. Once I have a question ready, I refine it to cover as many concepts as possible. Sometimes, I choose questions that are particularly thought-provoking to stimulate deeper discussions.
+I follow a structured approach to sharing knowledge on Threads, posting concepts and thought-provoking questions (IQs) that stem from my professional experience, academic background, and interview scenarios. These questions are either ones I have encountered, been asked in interviews, or would consider posing in a data science discussion. I refine each question to maximize conceptual coverage and, at times, deliberately choose intellectually stimulating topics to encourage deeper engagement.
 
 ## Star History ⭐
 
@@ -131,8 +133,17 @@ Currently, I follow a simple format to disseminate knowledge on Threads. I post 
 ## Contributing 🤝
 Contributions are welcome! If you have suggestions for new questions, additional resources, or improvements to the current answers, feel free to submit a pull request or open an issue.
 
-## License 📜
-This project is licensed under the MIT License – see the `LICENSE` file for details.
+## License
+
+- **Code** in this repository is licensed under the **MIT License**.  
+- **Content (text, explanations, visualizations, etc.)** is licensed under **Creative Commons Attribution 4.0 (CC BY 4.0)**.  
+
+This means:
+- You are free to use and modify the code as per the MIT license.  
+- You may reuse and share content, but you **must provide proper attribution**.  
+
+For details, check the [LICENSE](LICENSE) file.
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
 ## Contact 📫
 Email: AIinMinutes@icloud.com 
