@@ -142,7 +142,7 @@ This means:
 - You are free to use and modify the code as per the MIT license.  
 - You may reuse and share content, but you **must provide proper attribution**.  
 
-For details, check the [LICENSE](LICENSE) file.
+For details, check the [LICENSE](LICENSE.md) file.
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
 ## Contact 📫
