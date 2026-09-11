@@ -1,0 +1,47 @@
+name: Publish learnaiinminutes.com
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "general_notes/**"
+      - "subject_notes/**"
+      - "research_paper_notes/**"
+      - "random/**"
+      - "scripts/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/publish-site.yml"
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Build site
+        run: uv run python scripts/build_site.py
+
+      - name: Publish to AIinMinutes.github.io
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          personal_token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
+          external_repository: AIinMinutes/AIinMinutes.github.io
+          publish_branch: gh-pages
+          publish_dir: ./_site
+          keep_files: true
+          cname: learnaiinminutes.com
+          enable_jekyll: false
+          commit_message: Publish Marimo notes to learnaiinminutes.com

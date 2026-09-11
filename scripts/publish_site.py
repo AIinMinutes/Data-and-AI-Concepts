@@ -45,20 +45,20 @@ def copy_site(site: Path, dest: Path) -> None:
     shutil.copy2(site / "index.html", dest / "index.html")
     shutil.copy2(site / "CNAME", dest / "CNAME")
     (dest / ".nojekyll").write_text("")
-    src_notes = site / "fundamentals"
-    dst_notes = dest / "fundamentals"
-    if dst_notes.exists():
-        shutil.rmtree(dst_notes)
-    shutil.copytree(src_notes, dst_notes)
+    for folder in ["general_notes", "fundamentals", "random", "subject_notes", "research_paper_notes"]:
+        src = site / folder
+        dst = dest / folder
+        if src.exists():
+            if dst.exists():
+                shutil.rmtree(dst)
+            shutil.copytree(src, dst)
 
 
 def publish(site: Path, push: bool) -> None:
     dest = ensure_clone()
     copy_site(site, dest)
-    run(["git", "add", "index.html", "CNAME", ".nojekyll", "fundamentals"], cwd=dest)
-    dirty = subprocess.run(
-        ["git", "diff", "--cached", "--quiet"], cwd=dest
-    ).returncode
+    run(["git", "add", "-A"], cwd=dest)
+    dirty = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=dest).returncode
     if dirty == 0:
         print("nothing to publish")
         return

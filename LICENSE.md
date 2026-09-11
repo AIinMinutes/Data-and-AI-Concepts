@@ -12,13 +12,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ## Content License (CC BY 4.0)
 
-This repository’s non-code content (text, explanations, visualizations, etc.) is licensed under the **Creative Commons Attribution 4.0 International (CC BY 4.0)** license.  
+This repository’s non-code content (text, explanations, visualizations, etc.) is licensed under the **Creative Commons Attribution 4.0 International (CC BY 4.0)** license.
 
 This means you are free to:
 - **Share** — Copy and redistribute the material in any medium or format.
-- **Adapt** — Remix, transform, and build upon the material for any purpose, even commercially.  
+- **Adapt** — Remix, transform, and build upon the material for any purpose, even commercially.
 
 **Under the following terms:**
-- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.  
+- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
 
 For full details, see the official license: [CC BY 4.0 License](https://creativecommons.org/licenses/by/4.0/).

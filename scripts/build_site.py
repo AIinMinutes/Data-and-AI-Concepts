@@ -6,83 +6,342 @@ from __future__ import annotations
 import argparse
 import re
 import subprocess
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parent.parent
 
-# Metadata for all 69 notes in sequential reading order
 NOTE_METADATA: dict[str, tuple[str, str, str]] = {
-    "00_introduction.py": ("Linear Algebra & Matrix Foundations", "Systems of Linear Equations", "Systems of linear equations, Ax = b, and vector representations"),
-    "01_inner_product.py": ("Linear Algebra & Matrix Foundations", "Inner Products", "Dot product, cosine similarity, angles, and projection geometry"),
-    "02_norm_and_metric.py": ("Linear Algebra & Matrix Foundations", "Norms and Metrics", "Lp norms, distance metrics, and the Minkowski inequality"),
-    "03_hyperplanes.py": ("Linear Algebra & Matrix Foundations", "Hyperplanes", "Decision boundaries, half-spaces, and linear separation geometry"),
-    "04_rank_one_matrices.py": ("Linear Algebra & Matrix Foundations", "Rank-One Matrices", "Outer products, low-rank factorization, and matrix approximations"),
-    "05_orthogonality.py": ("Linear Algebra & Matrix Foundations", "Orthogonality", "Orthogonal vectors, bases, projections, and Gram-Schmidt process"),
-    "06_moore_penrose_inverse.py": ("Linear Algebra & Matrix Foundations", "Moore-Penrose Pseudoinverse", "Pseudoinverse and least-squares solutions for overdetermined systems"),
-    "07_spectral_decomposition.py": ("Linear Algebra & Matrix Foundations", "Spectral Decomposition", "Eigendecomposition, symmetric matrices, and singular value decomposition"),
-    "08_matrix_calculus_short.py": ("Linear Algebra & Matrix Foundations", "Matrix Calculus", "Derivatives of vector and matrix expressions for optimization"),
-    "09_condition_number.py": ("Linear Algebra & Matrix Foundations", "Condition Number", "Numerical stability, matrix sensitivity, and multicollinearity diagnostics"),
-    "10_chebyshev_inequality.py": ("Probability & Statistical Foundations", "Chebyshev Inequality", "Distribution-free probability bounds and concentration"),
-    "11_ecdf.py": ("Probability & Statistical Foundations", "Empirical CDF", "Empirical distribution functions and non-parametric inference"),
-    "12_multivariate_normal_distribution.py": ("Probability & Statistical Foundations", "Multivariate Normal Distribution", "Multivariate Gaussian geometry, covariance matrices, and density contours"),
-    "13_unbiased_vs_consistent.py": ("Probability & Statistical Foundations", "Unbiased vs Consistent Estimators", "Core properties of statistical estimators and sample size behavior"),
-    "14_dist_of_minimum.py": ("Probability & Statistical Foundations", "Distribution of Minimum", "Order statistics and extreme value distributions"),
-    "15_mutual_information.py": ("Probability & Statistical Foundations", "Mutual Information", "Information theory, entropy, and non-linear feature dependence"),
-    "16_point_biserial.py": ("Probability & Statistical Foundations", "Point-Biserial Correlation", "Measuring association between continuous and binary variables"),
-    "17_jensen_inequality.py": ("Probability & Statistical Foundations", "Jensen's Inequality", "Convexity, expectation inequalities, and bounds in learning algorithms"),
-    "18_cramer_v.py": ("Applied Statistics & Correlation", "Cramer's V", "Strength of association between categorical variables"),
-    "19_kendalltaub.py": ("Applied Statistics & Correlation", "Kendall's Tau-b", "Non-parametric rank correlation robust to ties"),
-    "20_spurious_correlation.py": ("Applied Statistics & Correlation", "Spurious Correlation", "Confounders, lurking variables, and Simpson's paradox"),
-    "21_kruskal_wallis.py": ("Applied Statistics & Correlation", "Kruskal-Wallis Test", "Non-parametric ANOVA for comparing multiple groups"),
-    "22_acf_and_pacf.py": ("Applied Statistics & Correlation", "ACF and PACF", "Autocorrelation and partial autocorrelation for time series modeling"),
-    "23_ewa_and_bias_correction.py": ("Applied Statistics & Correlation", "Exponential Moving Averages", "EMA smoothing, momentum, and initial bias correction"),
-    "24_adjusted_r_squared.py": ("Applied Statistics & Correlation", "Adjusted R-Squared", "Penalizing model complexity in linear regression"),
-    "25_predictive_r2.py": ("Applied Statistics & Correlation", "Predictive R-Squared", "Leave-one-out cross-validation and generalization performance"),
-    "26_hotelling.py": ("Applied Statistics & Correlation", "Hotelling's T-Squared", "Multivariate hypothesis testing and group mean comparisons"),
-    "27_principal_component_analysis.py": ("Multivariate Methods & Dimensionality", "Principal Component Analysis", "Dimensionality reduction via covariance eigendecomposition"),
-    "28_factor_analysis.py": ("Multivariate Methods & Dimensionality", "Factor Analysis", "Latent variable modeling and unobserved factor estimation"),
-    "29_canonical_correlation_analysis.py": ("Multivariate Methods & Dimensionality", "Canonical Correlation Analysis", "Maximizing correlation between two multidimensional variable sets"),
-    "30_correspondence_analysis.py": ("Multivariate Methods & Dimensionality", "Correspondence Analysis", "Geometric visualization of contingency tables and categorical associations"),
-    "31_gaussian_mixture_models.py": ("Multivariate Methods & Dimensionality", "Gaussian Mixture Models", "Soft clustering, Expectation-Maximization, and density estimation"),
-    "32_elastic_net.py": ("Machine Learning Models & Diagnostics", "Elastic Net Regression", "Balancing L1 and L2 penalties for correlated feature selection"),
-    "33_huber_loss.py": ("Machine Learning Models & Diagnostics", "Huber Loss", "Robust regression combining squared and absolute error penalties"),
-    "34_mahalanobis_distance.py": ("Machine Learning Models & Diagnostics", "Mahalanobis Distance", "Covariance-scaled distance metrics for outlier detection"),
-    "35_gini_impurity_vs_entropy.py": ("Machine Learning Models & Diagnostics", "Gini Impurity vs Entropy", "Split evaluation criteria for decision trees"),
-    "36_agglomerative_clustering.py": ("Machine Learning Models & Diagnostics", "Agglomerative Clustering", "Hierarchical clustering, distance metrics, and dendrograms"),
-    "37_natural_breaks.py": ("Machine Learning Models & Diagnostics", "Natural Breaks (Jenks)", "1D clustering optimization for histogram and choropleth binning"),
-    "38_oversampling.py": ("Machine Learning Models & Diagnostics", "Oversampling and SMOTE", "Synthesizing minority class samples for imbalanced classification"),
-    "39_permutation_importance.py": ("Machine Learning Models & Diagnostics", "Permutation Feature Importance", "Model-agnostic feature importance via shuffling evaluation"),
-    "40_pca_vs_feat_ag.py": ("Machine Learning Models & Diagnostics", "PCA vs Feature Agglomeration", "Linear dimensionality reduction versus hierarchical feature clustering"),
-    "41_pseudo_r2.py": ("Machine Learning Models & Diagnostics", "Pseudo R-Squared", "Goodness-of-fit metrics for logistic regression and GLMs"),
-    "42_multiclass_classification.py": ("Machine Learning Models & Diagnostics", "Multiclass Classification", "Softmax functions, cross-entropy loss, and decision regions"),
-    "43_energy.py": ("Machine Learning Models & Diagnostics", "Energy-Based Models", "Energy landscapes, Boltzmann distributions, and score matching"),
-    "44_logistic_regression.py": ("Interpretable AI", "Logistic Regression Interpretability", "Log-odds, odds ratios, and marginal feature effects"),
-    "45_shapley.py": ("Interpretable AI", "Shapley Values and SHAP", "Game-theoretic feature attributions and local model explanations"),
-    "46_model_counterfactuals.py": ("Interpretable AI", "Model Counterfactuals", "Actionable recourse and minimal changes to alter model predictions"),
-    "47_gelu.py": ("Deep Learning & Generative AI", "GELU Activation", "Gaussian Error Linear Units in modern Transformer models"),
-    "48_temperature_scaled_softmax.py": ("Deep Learning & Generative AI", "Temperature-Scaled Softmax", "Calibrating confidence and diversity in probability distributions"),
-    "49_focal_loss_balanced.py": ("Deep Learning & Generative AI", "Focal Loss", "Down-weighting easy examples for dense object detection and hard mining"),
-    "50_attention_mechanism.py": ("Deep Learning & Generative AI", "Attention Mechanism", "Scaled dot-product attention as value weighting by query-key similarity"),
-    "51_causal_attention.py": ("Deep Learning & Generative AI", "Causal Attention", "Autoregressive masking in decoder-only generative models"),
-    "52_multi_head_attention.py": ("Deep Learning & Generative AI", "Multi-Head Attention", "Parallel representation subspaces in Transformer blocks"),
-    "53_layer_and_rms_normalization.py": ("Deep Learning & Generative AI", "LayerNorm and RMSNorm", "Internal activation scaling and modern variance normalization"),
-    "54_decoding_strategies.py": ("Deep Learning & Generative AI", "Decoding Strategies", "Greedy search, beam search, top-k, and nucleus (top-p) sampling"),
-    "55_perplexity.py": ("Deep Learning & Generative AI", "Perplexity", "Information-theoretic evaluation metric for autoregressive language models"),
-    "56_reparametrization_trick.py": ("Deep Learning & Generative AI", "Reparameterization Trick", "Differentiable sampling through stochastic nodes via auxiliary noise"),
-    "57_autoencoder_latent_space.py": ("Deep Learning & Generative AI", "Autoencoder Latent Space", "Deterministic bottleneck compression and feature representation"),
-    "58_pca_for_anomaly_detection.py": ("Deep Learning & Generative AI", "PCA for Anomaly Detection", "Reconstruction error in reduced eigenspaces as anomaly scoring"),
-    "59_vae_on_mnist.py": ("Deep Learning & Generative AI", "VAE on MNIST", "Variational Autoencoders with evidence lower bound (ELBO) optimization"),
-    "60_vae_anomaly_detection.py": ("Deep Learning & Generative AI", "VAE Anomaly Detection", "Probabilistic reconstruction likelihood for out-of-distribution detection"),
-    "61_user_item_interaction_matrix.py": ("Graphs & Applied Pipelines", "User-Item Interaction Matrix", "Bipartite graph representations for recommendation systems"),
-    "62_grammar_of_graphics.py": ("Graphs & Applied Pipelines", "Grammar of Graphics", "Layered visualization specifications with plotnine"),
-    "63_einsum.py": ("Programming Patterns & Tools", "Einstein Summation (einsum)", "Succinct multidimensional array contractions in NumPy and PyTorch"),
-    "64_pivoting.py": ("Programming Patterns & Tools", "Data Pivoting", "Reshaping and aggregating tabular datasets in Pandas"),
-    "65_cudf.py": ("Programming Patterns & Tools", "GPU Acceleration (cuDF)", "Accelerating dataframe pipelines with GPU memory and parallelism"),
-    "66_prefix_sum.py": ("Programming Patterns & Tools", "Prefix Sum Pattern", "Constant-time range sum queries with precomputed cumulative arrays"),
-    "67_kadanes.py": ("Programming Patterns & Tools", "Kadane's Algorithm", "Linear-time maximum contiguous subarray sum via dynamic programming"),
-    "68_two_pointer.py": ("Programming Patterns & Tools", "Two-Pointer Technique", "In-place array processing and linear scan search optimizations"),
+    "00_introduction.py": (
+        "Linear Algebra & Matrix Foundations",
+        "Systems of Linear Equations",
+        "Linear combinations, row vs column perspectives, and invertibility",
+    ),
+    "01_inner_product.py": (
+        "Linear Algebra & Matrix Foundations",
+        "Inner Products and Angles",
+        "Dot products, projection, geometric angles, and Hilbert spaces",
+    ),
+    "02_norm_and_metric.py": (
+        "Linear Algebra & Matrix Foundations",
+        "Vector Norms and Metrics",
+        "L1, L2, Lp norms, distances, and unit ball geometries",
+    ),
+    "03_hyperplanes.py": (
+        "Linear Algebra & Matrix Foundations",
+        "Hyperplanes and Halfspaces",
+        "Decision boundaries, affine sets, and separating hyperplanes",
+    ),
+    "04_rank_one_matrices.py": (
+        "Linear Algebra & Matrix Foundations",
+        "Rank-One Matrices",
+        "Outer products, low-rank factorization, and matrix approximations",
+    ),
+    "05_orthogonality.py": (
+        "Linear Algebra & Matrix Foundations",
+        "Orthogonality",
+        "Orthogonal vectors, bases, projections, and Gram-Schmidt process",
+    ),
+    "06_moore_penrose_inverse.py": (
+        "Linear Algebra & Matrix Foundations",
+        "Moore-Penrose Pseudoinverse",
+        "Pseudoinverse and least-squares solutions for overdetermined systems",
+    ),
+    "07_spectral_decomposition.py": (
+        "Linear Algebra & Matrix Foundations",
+        "Spectral Decomposition",
+        "Eigendecomposition, symmetric matrices, and singular value decomposition",
+    ),
+    "08_matrix_calculus_short.py": (
+        "Linear Algebra & Matrix Foundations",
+        "Matrix Calculus",
+        "Derivatives of vector and matrix expressions for optimization",
+    ),
+    "09_condition_number.py": (
+        "Linear Algebra & Matrix Foundations",
+        "Condition Number",
+        "Numerical stability, matrix sensitivity, and multicollinearity diagnostics",
+    ),
+    "10_chebyshev_inequality.py": (
+        "Probability & Statistical Foundations",
+        "Chebyshev Inequality",
+        "Distribution-free probability bounds and concentration",
+    ),
+    "11_ecdf.py": (
+        "Probability & Statistical Foundations",
+        "Empirical CDF",
+        "Empirical distribution functions and non-parametric inference",
+    ),
+    "12_multivariate_normal_distribution.py": (
+        "Probability & Statistical Foundations",
+        "Multivariate Normal Distribution",
+        "Multivariate Gaussian geometry, covariance matrices, and density contours",
+    ),
+    "13_unbiased_vs_consistent.py": (
+        "Probability & Statistical Foundations",
+        "Unbiased vs Consistent Estimators",
+        "Core properties of statistical estimators and sample size behavior",
+    ),
+    "14_dist_of_minimum.py": (
+        "Probability & Statistical Foundations",
+        "Distribution of Minimum",
+        "Order statistics and extreme value distributions",
+    ),
+    "15_mutual_information.py": (
+        "Probability & Statistical Foundations",
+        "Mutual Information",
+        "Information theory, entropy, and non-linear feature dependence",
+    ),
+    "16_point_biserial.py": (
+        "Probability & Statistical Foundations",
+        "Point-Biserial Correlation",
+        "Measuring association between continuous and binary variables",
+    ),
+    "17_jensen_inequality.py": (
+        "Probability & Statistical Foundations",
+        "Jensen's Inequality",
+        "Convexity, expectation inequalities, and bounds in learning algorithms",
+    ),
+    "18_cramer_v.py": (
+        "Applied Statistics & Correlation",
+        "Cramer's V",
+        "Strength of association between categorical variables",
+    ),
+    "19_kendalltaub.py": (
+        "Applied Statistics & Correlation",
+        "Kendall's Tau-b",
+        "Non-parametric rank correlation robust to ties",
+    ),
+    "20_spurious_correlation.py": (
+        "Applied Statistics & Correlation",
+        "Spurious Correlation",
+        "Confounders, lurking variables, and Simpson's paradox",
+    ),
+    "21_kruskal_wallis.py": (
+        "Applied Statistics & Correlation",
+        "Kruskal-Wallis Test",
+        "Non-parametric ANOVA for comparing multiple groups",
+    ),
+    "22_acf_and_pacf.py": (
+        "Applied Statistics & Correlation",
+        "ACF and PACF",
+        "Autocorrelation and partial autocorrelation for time series modeling",
+    ),
+    "23_ewa_and_bias_correction.py": (
+        "Applied Statistics & Correlation",
+        "Exponential Moving Averages",
+        "EMA smoothing, momentum, and initial bias correction",
+    ),
+    "24_adjusted_r_squared.py": (
+        "Applied Statistics & Correlation",
+        "Adjusted R-Squared",
+        "Penalizing model complexity in linear regression",
+    ),
+    "25_predictive_r2.py": (
+        "Applied Statistics & Correlation",
+        "Predictive R-Squared",
+        "Leave-one-out cross-validation and generalization performance",
+    ),
+    "26_hotelling.py": (
+        "Applied Statistics & Correlation",
+        "Hotelling's T-Squared",
+        "Multivariate hypothesis testing and group mean comparisons",
+    ),
+    "27_principal_component_analysis.py": (
+        "Multivariate Methods & Dimensionality",
+        "Principal Component Analysis",
+        "Dimensionality reduction via covariance eigendecomposition",
+    ),
+    "28_factor_analysis.py": (
+        "Multivariate Methods & Dimensionality",
+        "Factor Analysis",
+        "Latent variable modeling and unobserved factor estimation",
+    ),
+    "29_canonical_correlation_analysis.py": (
+        "Multivariate Methods & Dimensionality",
+        "Canonical Correlation Analysis",
+        "Maximizing correlation between two multidimensional variable sets",
+    ),
+    "30_correspondence_analysis.py": (
+        "Multivariate Methods & Dimensionality",
+        "Correspondence Analysis",
+        "Geometric visualization of contingency tables and categorical associations",
+    ),
+    "31_gaussian_mixture_models.py": (
+        "Multivariate Methods & Dimensionality",
+        "Gaussian Mixture Models",
+        "Soft clustering, Expectation-Maximization, and density estimation",
+    ),
+    "32_elastic_net.py": (
+        "Machine Learning Models & Diagnostics",
+        "Elastic Net Regression",
+        "Balancing L1 and L2 penalties for correlated feature selection",
+    ),
+    "33_huber_loss.py": (
+        "Machine Learning Models & Diagnostics",
+        "Huber Loss",
+        "Robust regression combining squared and absolute error penalties",
+    ),
+    "34_mahalanobis_distance.py": (
+        "Machine Learning Models & Diagnostics",
+        "Mahalanobis Distance",
+        "Covariance-scaled distance metrics for outlier detection",
+    ),
+    "35_gini_impurity_vs_entropy.py": (
+        "Machine Learning Models & Diagnostics",
+        "Gini Impurity vs Entropy",
+        "Split evaluation criteria for decision trees",
+    ),
+    "36_agglomerative_clustering.py": (
+        "Machine Learning Models & Diagnostics",
+        "Agglomerative Clustering",
+        "Hierarchical clustering, distance metrics, and dendrograms",
+    ),
+    "37_natural_breaks.py": (
+        "Machine Learning Models & Diagnostics",
+        "Natural Breaks (Jenks)",
+        "1D clustering optimization for histogram and choropleth binning",
+    ),
+    "38_oversampling.py": (
+        "Machine Learning Models & Diagnostics",
+        "Oversampling and SMOTE",
+        "Synthesizing minority class samples for imbalanced classification",
+    ),
+    "39_permutation_importance.py": (
+        "Machine Learning Models & Diagnostics",
+        "Permutation Feature Importance",
+        "Model-agnostic feature importance via shuffling evaluation",
+    ),
+    "40_pca_vs_feat_ag.py": (
+        "Machine Learning Models & Diagnostics",
+        "PCA vs Feature Agglomeration",
+        "Linear dimensionality reduction versus hierarchical feature clustering",
+    ),
+    "41_pseudo_r2.py": (
+        "Machine Learning Models & Diagnostics",
+        "Pseudo R-Squared",
+        "Goodness-of-fit metrics for logistic regression and GLMs",
+    ),
+    "42_multiclass_classification.py": (
+        "Machine Learning Models & Diagnostics",
+        "Multiclass Classification",
+        "Softmax functions, cross-entropy loss, and decision regions",
+    ),
+    "43_energy.py": (
+        "Machine Learning Models & Diagnostics",
+        "Energy-Based Models",
+        "Energy landscapes, Boltzmann distributions, and score matching",
+    ),
+    "44_logistic_regression.py": (
+        "Interpretable AI",
+        "Logistic Regression Interpretability",
+        "Log-odds, odds ratios, and marginal feature effects",
+    ),
+    "45_shapley.py": (
+        "Interpretable AI",
+        "Shapley Values and SHAP",
+        "Game-theoretic feature attributions and local model explanations",
+    ),
+    "46_model_counterfactuals.py": (
+        "Interpretable AI",
+        "Model Counterfactuals",
+        "Actionable recourse and minimal changes to alter model predictions",
+    ),
+    "47_gelu.py": (
+        "Deep Learning & Generative AI",
+        "GELU Activation",
+        "Gaussian Error Linear Units in modern Transformer models",
+    ),
+    "48_temperature_scaled_softmax.py": (
+        "Deep Learning & Generative AI",
+        "Temperature-Scaled Softmax",
+        "Calibrating confidence and diversity in probability distributions",
+    ),
+    "49_focal_loss_balanced.py": (
+        "Deep Learning & Generative AI",
+        "Focal Loss",
+        "Down-weighting easy examples for dense object detection and hard mining",
+    ),
+    "50_attention_mechanism.py": (
+        "Deep Learning & Generative AI",
+        "Attention Mechanism",
+        "Scaled dot-product attention as value weighting by query-key similarity",
+    ),
+    "51_causal_attention.py": (
+        "Deep Learning & Generative AI",
+        "Causal Attention",
+        "Autoregressive masking in decoder-only generative models",
+    ),
+    "52_multi_head_attention.py": (
+        "Deep Learning & Generative AI",
+        "Multi-Head Attention",
+        "Parallel representation subspaces in Transformer blocks",
+    ),
+    "53_layer_and_rms_normalization.py": (
+        "Deep Learning & Generative AI",
+        "LayerNorm and RMSNorm",
+        "Internal activation scaling and modern variance normalization",
+    ),
+    "54_decoding_strategies.py": (
+        "Deep Learning & Generative AI",
+        "Decoding Strategies",
+        "Greedy search, beam search, top-k, and nucleus (top-p) sampling",
+    ),
+    "55_perplexity.py": (
+        "Deep Learning & Generative AI",
+        "Perplexity",
+        "Information-theoretic evaluation metric for autoregressive language models",
+    ),
+    "56_reparametrization_trick.py": (
+        "Deep Learning & Generative AI",
+        "Reparameterization Trick",
+        "Differentiable sampling through stochastic nodes via auxiliary noise",
+    ),
+    "57_autoencoder_latent_space.py": (
+        "Deep Learning & Generative AI",
+        "Autoencoder Latent Space",
+        "Deterministic bottleneck compression and feature representation",
+    ),
+    "58_pca_for_anomaly_detection.py": (
+        "Deep Learning & Generative AI",
+        "PCA for Anomaly Detection",
+        "Reconstruction error in reduced eigenspaces as anomaly scoring",
+    ),
+    "59_vae_on_mnist.py": (
+        "Deep Learning & Generative AI",
+        "VAE on MNIST",
+        "Variational Autoencoders with evidence lower bound (ELBO) optimization",
+    ),
+    "60_vae_anomaly_detection.py": (
+        "Deep Learning & Generative AI",
+        "VAE Anomaly Detection",
+        "Probabilistic reconstruction likelihood for out-of-distribution detection",
+    ),
+    "61_user_item_interaction_matrix.py": (
+        "Graphs & Applied Pipelines",
+        "User-Item Interaction Matrix",
+        "Bipartite graph representations for recommendation systems",
+    ),
+    "62_grammar_of_graphics.py": (
+        "Graphs & Applied Pipelines",
+        "Grammar of Graphics",
+        "Layered visualization specifications with plotnine",
+    ),
+    "63_einsum.py": (
+        "Programming Patterns & Tools",
+        "Einstein Summation (einsum)",
+        "Succinct multidimensional array contractions in NumPy and PyTorch",
+    ),
+    "64_pivoting.py": (
+        "Programming Patterns & Tools",
+        "Data Pivoting",
+        "Reshaping and aggregating tabular datasets in Pandas",
+    ),
+    "65_cudf.py": (
+        "Programming Patterns & Tools",
+        "GPU Acceleration (cuDF)",
+        "Accelerating dataframe pipelines with GPU memory and parallelism",
+    ),
 }
 
 
@@ -94,31 +353,54 @@ class Note:
     topic: str
     blurb: str
     number: int
+    category: str = "General Notes"
 
 
 def get_all_notes() -> list[Note]:
-    """Discover all 69 numbered notes in sequential order."""
-    notes_dir = ROOT / "notebooks" / "fundamentals"
+    """Discover all general notes in sequential order, plus random notes."""
+    notes: list[Note] = []
+
+    # 1. General Notes (00 to 65)
+    notes_dir = ROOT / "general_notes"
     py_files = sorted(notes_dir.glob("[0-9][0-9]_*.py"))
-    notes = []
     for file in py_files:
         filename = file.name
         match = re.match(r"^(\d+)_", filename)
         num = int(match.group(1)) if match else 0
         topic, clean_title, blurb = NOTE_METADATA.get(
             filename,
-            ("Fundamentals", filename.replace(".py", "").replace("_", " ").title(), "Data and AI concept note"),
+            ("General Notes", filename.replace(".py", "").replace("_", " ").title(), "Data and AI concept note"),
         )
         notes.append(
             Note(
                 source=file.relative_to(ROOT),
-                slug=f"fundamentals/{file.stem}",
+                slug=f"general_notes/{file.stem}",
                 title=f"Note {num:02d}: {clean_title}",
                 topic=topic,
                 blurb=blurb,
                 number=num,
+                category="General Notes",
             )
         )
+
+    # 2. Random / Algorithmic Notes
+    random_dir = ROOT / "random"
+    if random_dir.is_dir():
+        random_files = sorted(random_dir.glob("*.py"))
+        for i, file in enumerate(random_files, start=100):
+            title = file.stem.replace("_", " ").title()
+            notes.append(
+                Note(
+                    source=file.relative_to(ROOT),
+                    slug=f"random/{file.stem}",
+                    title=f"Random: {title}",
+                    topic="Random & Programming Patterns",
+                    blurb="Algorithmic problem-solving and programming techniques.",
+                    number=i,
+                    category="Random",
+                )
+            )
+
     return notes
 
 
@@ -138,6 +420,14 @@ def export_note(note: Note, prev_note: Note | None, next_note: Note | None, outp
     ]
     print(f"export {note.source} -> {html_path.relative_to(output_dir)}")
     subprocess.run(cmd, cwd=ROOT, check=True)
+
+    # Also create alias for fundamentals/ for backwards compatibility
+    if note.slug.startswith("general_notes/"):
+        stem = note.slug.split("/")[-1]
+        compat_path = output_dir / "fundamentals" / stem / "index.html"
+        compat_path.parent.mkdir(parents=True, exist_ok=True)
+        redirect_html = f'<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=/{note.slug}/"><link rel="canonical" href="/{note.slug}/"></head><body>Redirecting to <a href="/{note.slug}/">/{note.slug}/</a>...</body></html>'
+        compat_path.write_text(redirect_html, encoding="utf-8")
 
     # Inject order links into the exported HTML
     if html_path.is_file():
@@ -159,7 +449,6 @@ def export_note(note: Note, prev_note: Note | None, next_note: Note | None, outp
           <div>{next_html}</div>
         </header>
         """
-        # Inject right after <body> or at top of html
         if "<body" in content:
             content = re.sub(r"(<body[^>]*>)", r"\1" + nav_header, content, count=1)
             html_path.write_text(content, encoding="utf-8")
@@ -169,24 +458,67 @@ def export_note(note: Note, prev_note: Note | None, next_note: Note | None, outp
 
 def render_index(notes: list[Note]) -> str:
     # Group notes by Topic / Part
+    general_notes = [n for n in notes if n.category == "General Notes"]
+    random_notes = [n for n in notes if n.category == "Random"]
+
     topics: dict[str, list[Note]] = {}
-    for note in notes:
+    for note in general_notes:
         topics.setdefault(note.topic, []).append(note)
 
     sections_html = []
     for topic, topic_notes in topics.items():
         items = "\n".join(
-            f'        <li>\n'
+            f"        <li>\n"
             f'          <a href="/{note.slug}/">{note.title}</a>\n'
             f'          <p class="blurb">{note.blurb}</p>\n'
-            f'        </li>'
+            f"        </li>"
             for note in topic_notes
         )
+        sections_html.append(f'      <h2>{topic}</h2>\n      <ol class="note-list">\n{items}\n      </ol>')
+
+    # Subject Notes Section
+    subject_section = """
+      <h2>Subject Notes (Deep Dives)</h2>
+      <ol class="note-list">
+        <li>
+          <span style="font-weight: 600; color: #1f4e79;">Multivariate Analysis</span>
+          <p class="blurb">Advanced multivariate statistical techniques and geometric formulations (in progress).</p>
+        </li>
+        <li>
+          <span style="font-weight: 600; color: #1f4e79;">Functional Data Analysis</span>
+          <p class="blurb">Infinite-dimensional representations, smoothing, and functional principal components (in progress).</p>
+        </li>
+      </ol>
+    """
+    sections_html.append(subject_section)
+
+    # Research Paper Notes Section
+    paper_section = """
+      <h2>Research Paper Notes</h2>
+      <ol class="note-list">
+        <li>
+          <span style="font-weight: 600; color: #1f4e79;">TabICLv2</span>
+          <p class="blurb">Tabular foundation model for in-context learning, classification, and regression (research notes).</p>
+        </li>
+        <li>
+          <span style="font-weight: 600; color: #1f4e79;">LeJEPA</span>
+          <p class="blurb">Joint-Embedding Predictive Architecture formulations and explorations (research notes).</p>
+        </li>
+      </ol>
+    """
+    sections_html.append(paper_section)
+
+    # Random Notes Section
+    if random_notes:
+        random_items = "\n".join(
+            f"        <li>\n"
+            f'          <a href="/{note.slug}/">{note.title}</a>\n'
+            f'          <p class="blurb">{note.blurb}</p>\n'
+            f"        </li>"
+            for note in random_notes
+        )
         sections_html.append(
-            f'      <h2>{topic}</h2>\n'
-            f'      <ol class="note-list">\n'
-            f'{items}\n'
-            f'      </ol>'
+            f'      <h2>Random & Programming Patterns</h2>\n      <ol class="note-list">\n{random_items}\n      </ol>'
         )
 
     content_body = "\n".join(sections_html)
@@ -250,31 +582,31 @@ def render_index(notes: list[Note]) -> str:
         transition: background-color 0.15s ease;
       }}
       ol.note-list li:hover {{
-        background-color: var(--bg-hover);
+        background: var(--bg-hover);
       }}
-      ol.note-list li + li {{
-        margin-top: 0.5rem;
-      }}
-      a {{
+      ol.note-list a {{
         color: var(--accent);
         text-decoration: none;
-      }}
-      a:hover {{ text-decoration: underline; }}
-      ol.note-list li > a {{
-        font-size: 1.12rem;
         font-weight: 600;
+        font-size: 1.05rem;
+      }}
+      ol.note-list a:hover {{
+        text-decoration: underline;
       }}
       .blurb {{
-        color: #444;
-        font-size: 0.95rem;
         margin: 0.25rem 0 0;
+        font-size: 0.95rem;
+        color: var(--muted);
       }}
       .foot {{
-        margin-top: 3.5rem;
+        margin-top: 4rem;
         padding-top: 1.5rem;
         border-top: 1px solid var(--rule);
+        font-size: 0.9rem;
         color: var(--muted);
-        font-size: 0.92rem;
+      }}
+      .foot a {{
+        color: var(--accent);
       }}
     </style>
   </head>
@@ -310,14 +642,19 @@ def build(output_dir: Path, only: str | None) -> None:
     (output_dir / ".nojekyll").write_text("")
     (output_dir / "CNAME").write_text("learnaiinminutes.com\n")
 
+    general_notes = [n for n in all_notes if n.category == "General Notes"]
     for i, note in enumerate(selected):
         if not (ROOT / note.source).is_file():
             raise SystemExit(f"missing notebook: {note.source}")
-        prev_note = all_notes[note.number - 1] if note.number > 0 else None
-        next_note = all_notes[note.number + 1] if note.number < len(all_notes) - 1 else None
+        if note.category == "General Notes":
+            idx = general_notes.index(note)
+            prev_note = general_notes[idx - 1] if idx > 0 else None
+            next_note = general_notes[idx + 1] if idx < len(general_notes) - 1 else None
+        else:
+            prev_note = None
+            next_note = None
         export_note(note, prev_note, next_note, output_dir)
 
-    # Render complete homepage index
     (output_dir / "index.html").write_text(render_index(all_notes), encoding="utf-8")
     print(f"site built -> {output_dir}")
 
