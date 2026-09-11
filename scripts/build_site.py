@@ -355,6 +355,7 @@ PROCESSED_NOTES: list[str] = [
     "06_moore_penrose_inverse.py",
     "07_spectral_decomposition.py",
     "08_matrix_calculus_short.py",
+    "09_condition_number.py",
 ]
 
 
