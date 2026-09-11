@@ -1,0 +1,46 @@
+[project]
+name = "data-stats-ai-concepts"
+version = "0.1.0"
+description = "Notebooks covering data, stats, and AI concepts"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    # Jupyter
+    "jupyter>=1.0",
+    "ipykernel>=6.29",
+    "ipython>=8.20",
+    # Core scientific stack
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "matplotlib>=3.8",
+    "seaborn>=0.13",
+    "scipy>=1.11",
+    "scikit-learn>=1.5.1",
+    "statsmodels>=0.14",
+    "sympy>=1.12",
+    "networkx>=3.2",
+    "pillow>=10.3",
+    # Deep learning / generative AI
+    "torch>=2.2",
+    "torchvision>=0.17",
+    "transformers>=4.40",
+    # Notebook-specific libraries
+    "dice-ml>=0.11",
+    "imbalanced-learn>=0.12",
+    "jenkspy>=0.4",
+    "lmppl==0.3.2",
+    "pingouin==0.5.5",
+    "plotnine>=0.13",
+    "polars>=1.0",
+    "prince>=0.13",
+    "pyod==2.0.2",
+    "shap>=0.45",
+    "marimo>=0.24.0",
+    "plotly>=7.0.0",
+]
+
+[tool.uv]
+package = false
+
+# GPU extras for notebooks/fundamentals/programming/optimization/cudf.py (Linux + CUDA 12):
+#   uv pip install --extra-index-url https://pypi.nvidia.com cudf-cu12 "polars[gpu]"

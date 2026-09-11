@@ -1,2 +1,24 @@
 .DS_Store
 .ipynb_checkpoints/
+.venv/
+_site/
+.pages/
+
+# Slide decks and infographics (this repo is notebooks only)
+slides/
+infographics/
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+
+# Python, Marimo, and local dev
+__pycache__/
+*.pyc
+**/__marimo__/
+.python-version
+.grok/
+.github/
+
