@@ -375,6 +375,7 @@ PROCESSED_NOTES: list[str] = [
     "26_hotelling.py",
     "27_principal_component_analysis.py",
     "28_factor_analysis.py",
+    "29_canonical_correlation_analysis.py",
 ]
 
 
