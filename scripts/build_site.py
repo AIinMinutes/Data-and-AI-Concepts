@@ -397,6 +397,7 @@ PROCESSED_NOTES: list[str] = [
     "48_temperature_scaled_softmax.py",
     "49_focal_loss_balanced.py",
     "50_attention_mechanism.py",
+    "51_causal_attention.py",
 ]
 
 
