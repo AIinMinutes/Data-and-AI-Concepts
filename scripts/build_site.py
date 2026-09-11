@@ -345,6 +345,17 @@ NOTE_METADATA: dict[str, tuple[str, str, str]] = {
 }
 
 
+PROCESSED_NOTES: list[str] = [
+    "00_introduction.py",
+    "01_inner_product.py",
+    "02_norm_and_metric.py",
+    "03_hyperplanes.py",
+    "04_rank_one_matrices.py",
+    "05_orthogonality.py",
+    "06_moore_penrose_inverse.py",
+]
+
+
 @dataclass(frozen=True)
 class Note:
     source: Path
@@ -356,13 +367,17 @@ class Note:
     category: str = "General Notes"
 
 
-def get_all_notes() -> list[Note]:
-    """Discover all general notes in sequential order, plus random notes."""
+def get_all_notes(include_all: bool = False) -> list[Note]:
+    """Discover notes in sequential order. By default, exports only processed notes."""
     notes: list[Note] = []
 
-    # 1. General Notes (00 to 65)
+    # 1. General Notes
     notes_dir = ROOT / "general_notes"
-    py_files = sorted(notes_dir.glob("[0-9][0-9]_*.py"))
+    if include_all:
+        py_files = sorted(notes_dir.glob("[0-9][0-9]_*.py"))
+    else:
+        py_files = [notes_dir / name for name in PROCESSED_NOTES if (notes_dir / name).is_file()]
+
     for file in py_files:
         filename = file.name
         match = re.match(r"^(\d+)_", filename)
@@ -374,7 +389,7 @@ def get_all_notes() -> list[Note]:
         notes.append(
             Note(
                 source=file.relative_to(ROOT),
-                slug=f"general_notes/{file.stem}",
+                slug=f"fundamentals/{file.stem}",
                 title=f"Note {num:02d}: {clean_title}",
                 topic=topic,
                 blurb=blurb,
@@ -383,23 +398,24 @@ def get_all_notes() -> list[Note]:
             )
         )
 
-    # 2. Random / Algorithmic Notes
-    random_dir = ROOT / "random"
-    if random_dir.is_dir():
-        random_files = sorted(random_dir.glob("*.py"))
-        for i, file in enumerate(random_files, start=100):
-            title = file.stem.replace("_", " ").title()
-            notes.append(
-                Note(
-                    source=file.relative_to(ROOT),
-                    slug=f"random/{file.stem}",
-                    title=f"Random: {title}",
-                    topic="Random & Programming Patterns",
-                    blurb="Algorithmic problem-solving and programming techniques.",
-                    number=i,
-                    category="Random",
+    # 2. Random / Algorithmic Notes (only if include_all is True)
+    if include_all:
+        random_dir = ROOT / "random"
+        if random_dir.is_dir():
+            random_files = sorted(random_dir.glob("*.py"))
+            for i, file in enumerate(random_files, start=100):
+                title = file.stem.replace("_", " ").title()
+                notes.append(
+                    Note(
+                        source=file.relative_to(ROOT),
+                        slug=f"random/{file.stem}",
+                        title=f"Random: {title}",
+                        topic="Random & Programming Patterns",
+                        blurb="Algorithmic problem-solving and programming techniques.",
+                        number=i,
+                        category="Random",
+                    )
                 )
-            )
 
     return notes
 
@@ -433,17 +449,24 @@ def export_note(
     if res.returncode != 0:
         print(f"notice: {note.source} exported with code {res.returncode}")
 
-    # Also create alias for fundamentals/ for backwards compatibility
-    if note.slug.startswith("general_notes/"):
-        stem = note.slug.split("/")[-1]
-        compat_path = output_dir / "fundamentals" / stem / "index.html"
-        compat_path.parent.mkdir(parents=True, exist_ok=True)
-        redirect_html = f'<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=/{note.slug}/"><link rel="canonical" href="/{note.slug}/"></head><body>Redirecting to <a href="/{note.slug}/">/{note.slug}/</a>...</body></html>'
-        compat_path.write_text(redirect_html, encoding="utf-8")
+    # Create general_notes/ alias for backwards and URL compatibility
+    stem = note.slug.split("/")[-1]
+    compat_path = output_dir / "general_notes" / stem / "index.html"
+    compat_path.parent.mkdir(parents=True, exist_ok=True)
+    redirect_html = f'<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=/{note.slug}/"><link rel="canonical" href="/{note.slug}/"></head><body>Redirecting to <a href="/{note.slug}/">/{note.slug}/</a>...</body></html>'
+    compat_path.write_text(redirect_html, encoding="utf-8")
 
-    # Inject order links into the exported HTML
+    # Inject order links and rewrite .py links in the exported HTML
     if html_path.is_file():
         content = html_path.read_text(encoding="utf-8")
+
+        # Rewrite internal note .py links (e.g. 01_inner_product.py) to web URLs (/fundamentals/01_inner_product/)
+        content = re.sub(
+            r'href="(?:\./)?(\d{2}_[a-zA-Z0-9_]+)\.py"',
+            r'href="/fundamentals/\1/"',
+            content,
+        )
+
         prev_html = (
             f'<a href="/{prev_note.slug}/" style="color: #1f4e79; text-decoration: none; font-weight: 500;">&larr; {prev_note.title}</a>'
             if prev_note
@@ -463,7 +486,7 @@ def export_note(
         """
         if "<body" in content:
             content = re.sub(r"(<body[^>]*>)", r"\1" + nav_header, content, count=1)
-            html_path.write_text(content, encoding="utf-8")
+        html_path.write_text(content, encoding="utf-8")
 
     return html_path
 
@@ -640,8 +663,8 @@ def render_index(notes: list[Note]) -> str:
 """
 
 
-def build(output_dir: Path, only: str | None, force: bool = False) -> None:
-    all_notes = get_all_notes()
+def build(output_dir: Path, only: str | None, force: bool = False, include_all: bool = False) -> None:
+    all_notes = get_all_notes(include_all=include_all)
     selected = [
         note
         for note in all_notes
@@ -688,9 +711,14 @@ def main() -> None:
         action="store_true",
         help="force export of all notebooks even if unchanged",
     )
+    parser.add_argument(
+        "--include-all",
+        action="store_true",
+        help="export all 66 notes including unreviewed ones (default: only processed notes)",
+    )
     args = parser.parse_args()
     try:
-        build(args.output.resolve(), args.only, force=args.force)
+        build(args.output.resolve(), args.only, force=args.force, include_all=args.include_all)
     except subprocess.CalledProcessError as exc:
         raise SystemExit(exc.returncode) from exc
 
