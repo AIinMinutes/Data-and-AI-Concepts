@@ -370,6 +370,7 @@ PROCESSED_NOTES: list[str] = [
     "21_kruskal_wallis.py",
     "22_acf_and_pacf.py",
     "23_ewa_and_bias_correction.py",
+    "24_adjusted_r_squared.py",
 ]
 
 
