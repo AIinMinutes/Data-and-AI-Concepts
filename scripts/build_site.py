@@ -377,6 +377,7 @@ PROCESSED_NOTES: list[str] = [
     "28_factor_analysis.py",
     "29_canonical_correlation_analysis.py",
     "30_correspondence_analysis.py",
+    "31_gaussian_mixture_models.py",
 ]
 
 
