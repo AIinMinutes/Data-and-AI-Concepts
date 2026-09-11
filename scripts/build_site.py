@@ -358,6 +358,7 @@ PROCESSED_NOTES: list[str] = [
     "09_condition_number.py",
     "10_chebyshev_inequality.py",
     "11_ecdf.py",
+    "12_multivariate_normal_distribution.py",
 ]
 
 
