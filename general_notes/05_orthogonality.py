@@ -24,13 +24,27 @@ def _(mo):
 
     ---
 
-    An orthogonal matrix represents a linear transformation that preserves the geometry of Euclidean space. When an orthogonal operator acts on a vector space, it strictly preserves lengths, distances, and angles between vectors. These distance-preserving transformations, known as **isometries**, form the structural foundation of stable numerical solvers, coordinate frame rotations, and rotary position embeddings (RoPE) in modern deep learning.
+    ## [a] Why do you need to know these concepts?
 
+    An orthogonal matrix represents a linear transformation that preserves the fundamental geometry of Euclidean space. When an orthogonal operator acts on a vector space, it strictly preserves lengths, distances, and angles between vectors.
+
+    These distance-preserving transformations, known as **isometries**, form the structural foundation of:
+    1. **Rotary Position Embeddings (RoPE)**: Encoding relative token distances in modern LLMs (Llama 3, Mistral, Gemma) via 2D orthogonal rotations.
+    2. **Orthogonal Weight Initialization**: Preserving gradient norm propagation across deep neural network layers without vanishing or exploding gradients.
+    3. **QR Factorization and Stable Solvers**: Computing numerically stable matrix inversions and least-squares solutions without squaring condition numbers.
+    4. **Coordinate Frame Transformations**: Rotating and reflecting feature spaces without introducing geometric distortion.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
     ---
 
-    ## 1. Mathematical Foundations
+    ## [b] Concept explanation with their role in ML/AI/Stats?
 
-    ### Definition
+    ### Definition: Orthogonal Matrix
 
     A square matrix $\mathbf{Q} \in \mathbb{R}^{n \times n}$ is orthogonal if its transpose equals its inverse:
 
@@ -96,15 +110,17 @@ def _(mo):
 
     This separates orthogonal transformations into two distinct geometric classes:
 
-    1. **Rotations ($\det(\mathbf{Q}) = +1$):**
-       Belong to the Special Orthogonal Group $\text{SO}(n)$. These transformations preserve orientation and chirality. In two dimensions, a counter-clockwise rotation by angle $\theta$ is:
+    #### Rotations ($\det(\mathbf{Q}) = +1$)
+
+    Transformations belonging to the Special Orthogonal Group $\text{SO}(n)$ that preserve spatial orientation. In two dimensions, a counter-clockwise rotation by angle $\theta$ is:
 
     $$
     \mathbf{R}_\theta = \begin{bmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{bmatrix}, \quad \det(\mathbf{R}_\theta) = \cos^2\theta + \sin^2\theta = +1
     $$
 
-    2. **Reflections ($\det(\mathbf{Q}) = -1$):**
-       Transformations that reverse spatial orientation (mirror reflection). A reflection across a line oriented at angle $\phi$ relative to the positive x-axis is:
+    #### Reflections ($\det(\mathbf{Q}) = -1$)
+
+    Transformations that reverse spatial orientation (mirror reflection). A reflection across a line oriented at angle $\phi$ relative to the positive x-axis is:
 
     $$
     \mathbf{H}_\phi = \begin{bmatrix} \cos(2\phi) & \sin(2\phi) \\ \sin(2\phi) & -\cos(2\phi) \end{bmatrix}, \quad \det(\mathbf{H}_\phi) = -\cos^2(2\phi) - \sin^2(2\phi) = -1
@@ -112,9 +128,7 @@ def _(mo):
 
     ---
 
-    ## 2. Applications in Modern AI and Machine Learning
-
-    ### Rotary Position Embedding (RoPE) in Large Language Models
+    ### Rotary Position Embedding (RoPE) in LLMs
 
     State-of-the-art transformer architectures (such as Llama 3, Mistral, and Gemma) replace additive absolute positional embeddings with Rotary Position Embeddings (RoPE).
 
@@ -136,7 +150,7 @@ def _(mo):
     \langle \tilde{\mathbf{q}}_m, \tilde{\mathbf{k}}_n \rangle = \mathbf{q}_m^T \mathbf{R}_{n - m} \mathbf{k}_n
     $$
 
-    The inner product depends solely on the relative displacement $(n - m)$, while the $L_2$ norm of every individual query and key vector is preserved.
+    The inner product depends solely on the relative displacement $(n - m)$, while the $L_2$ norm of every individual query and key vector is strictly preserved.
 
     ---
 
@@ -173,6 +187,20 @@ def _(mo):
     $$
 
     Because $\kappa(\mathbf{Q}) = 1$, the condition number is not squared, avoiding severe loss of numerical precision in floating-point arithmetic.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ---
+
+    ## [c] Interactive Visualization: Rotation vs Reflection
+
+    The interactive subplots below demonstrate the geometric effect of 2D orthogonal transformations:
+    * **Left Panel**: Pure rotation ($\theta = 60^\circ$, $\det(\mathbf{Q}) = +1$), preserving basis orientation.
+    * **Right Panel**: Reflection across the $30^\circ$ mirror line ($\det(\mathbf{Q}) = -1$), flipping orientation.
     """)
     return
 
@@ -442,7 +470,7 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ## 3. Code Verification and Applications
+    ## [d] Code Examples
 
     ### Example 1: Numerical Verification of Orthogonality and Isometry Properties
 

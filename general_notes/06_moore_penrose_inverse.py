@@ -24,32 +24,48 @@ def _(mo):
 
     ---
 
+    ## [a] Why do you need to know these concepts?
+
     When solving a linear system $\mathbf{A}\mathbf{x} = \mathbf{b}$, a square, full-rank matrix yields a unique solution via the standard inverse $\mathbf{x} = \mathbf{A}^{-1}\mathbf{b}$. In practical machine learning, however, matrices are rarely square and invertible. Data matrices are typically tall (overdetermined, with more observations than features) or wide (underdetermined, with more parameters than observations).
 
     The **Moore-Penrose pseudoinverse** $\mathbf{A}^+$ generalizes matrix inversion to any rectangular or rank-deficient matrix $\mathbf{A} \in \mathbb{R}^{m \times n}$. It guarantees a uniquely defined, optimal solution:
     1. For overdetermined systems, it provides the **least-squares solution** minimizing residual error $\|\mathbf{A}\mathbf{x} - \mathbf{b}\|_2$.
     2. For underdetermined systems, it isolates the unique **minimum-norm solution** minimizing $\|\mathbf{x}\|_2$ among all exact interpolators.
+    3. For overparameterized deep models ($p \gg n$), gradient descent implicitly converges to this pseudoinverse solution, providing the foundation for understanding double descent.
+    """)
+    return
 
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
     ---
 
-    ## 1. Mathematical Foundations
+    ## [b] Concept explanation with their role in ML/AI/Stats?
 
     ### The Four Penrose Conditions
 
     For any matrix $\mathbf{A} \in \mathbb{R}^{m \times n}$, there exists a unique matrix $\mathbf{A}^+ \in \mathbb{R}^{n \times m}$ satisfying the four Moore-Penrose conditions:
 
     $$
-    \begin{aligned}
-    1. &\quad \mathbf{A} \mathbf{A}^+ \mathbf{A} = \mathbf{A} \\
-    2. &\quad \mathbf{A}^+ \mathbf{A} \mathbf{A}^+ = \mathbf{A}^+ \\
-    3. &\quad (\mathbf{A} \mathbf{A}^+)^T = \mathbf{A} \mathbf{A}^+ \\
-    4. &\quad (\mathbf{A}^+ \mathbf{A})^T = \mathbf{A}^+ \mathbf{A}
-    \end{aligned}
+    \mathbf{A} \mathbf{A}^+ \mathbf{A} = \mathbf{A}
+    $$
+
+    $$
+    \mathbf{A}^+ \mathbf{A} \mathbf{A}^+ = \mathbf{A}^+
+    $$
+
+    $$
+    (\mathbf{A} \mathbf{A}^+)^T = \mathbf{A} \mathbf{A}^+
+    $$
+
+    $$
+    (\mathbf{A}^+ \mathbf{A})^T = \mathbf{A}^+ \mathbf{A}
     $$
 
     Conditions 3 and 4 have fundamental geometric interpretations:
-    - $\mathbf{P}_{\text{col}(\mathbf{A})} = \mathbf{A}\mathbf{A}^+$ is the symmetric, orthogonal projection operator onto the column space of $\mathbf{A}$.
-    - $\mathbf{P}_{\text{row}(\mathbf{A})} = \mathbf{A}^+\mathbf{A}$ is the symmetric, orthogonal projection operator onto the row space of $\mathbf{A}$.
+    * $\mathbf{P}_{\text{col}(\mathbf{A})} = \mathbf{A}\mathbf{A}^+$ is the symmetric, orthogonal projection operator onto the column space of $\mathbf{A}$.
+    * $\mathbf{P}_{\text{row}(\mathbf{A})} = \mathbf{A}^+\mathbf{A}$ is the symmetric, orthogonal projection operator onto the row space of $\mathbf{A}$.
 
     ---
 
@@ -57,27 +73,29 @@ def _(mo):
 
     When $\mathbf{A}$ has full rank, the pseudoinverse takes explicit algebraic forms:
 
-    1. **Full Column Rank ($m > n$, Overdetermined):**
-       The Gram matrix $\mathbf{A}^T \mathbf{A} \in \mathbb{R}^{n \times n}$ is invertible. The pseudoinverse is the **left inverse**:
+    #### Full Column Rank ($m > n$, Overdetermined)
+
+    The Gram matrix $\mathbf{A}^T \mathbf{A} \in \mathbb{R}^{n \times n}$ is invertible. The pseudoinverse is the **left inverse**:
 
     $$
     \mathbf{A}^+ = (\mathbf{A}^T \mathbf{A})^{-1} \mathbf{A}^T
     $$
 
-       Notice that $\mathbf{A}^+ \mathbf{A} = (\mathbf{A}^T \mathbf{A})^{-1} \mathbf{A}^T \mathbf{A} = \mathbf{I}_n$. The solution $\hat{\mathbf{x}} = \mathbf{A}^+ \mathbf{b}$ minimizes the sum of squared residuals:
+    Notice that $\mathbf{A}^+ \mathbf{A} = (\mathbf{A}^T \mathbf{A})^{-1} \mathbf{A}^T \mathbf{A} = \mathbf{I}_n$. The solution $\hat{\mathbf{x}} = \mathbf{A}^+ \mathbf{b}$ minimizes the sum of squared residuals:
 
     $$
     \min_{\mathbf{x} \in \mathbb{R}^n} \|\mathbf{A}\mathbf{x} - \mathbf{b}\|_2^2
     $$
 
-    2. **Full Row Rank ($m < n$, Underdetermined):**
-       The matrix $\mathbf{A} \mathbf{A}^T \in \mathbb{R}^{m \times m}$ is invertible. The pseudoinverse is the **right inverse**:
+    #### Full Row Rank ($m < n$, Underdetermined)
+
+    The matrix $\mathbf{A} \mathbf{A}^T \in \mathbb{R}^{m \times m}$ is invertible. The pseudoinverse is the **right inverse**:
 
     $$
     \mathbf{A}^+ = \mathbf{A}^T (\mathbf{A} \mathbf{A}^T)^{-1}
     $$
 
-       Notice that $\mathbf{A} \mathbf{A}^+ = \mathbf{A} \mathbf{A}^T (\mathbf{A} \mathbf{A}^T)^{-1} = \mathbf{I}_m$. The system $\mathbf{A}\mathbf{x} = \mathbf{b}$ has infinitely many solutions, and $\hat{\mathbf{x}} = \mathbf{A}^+ \mathbf{b}$ selects the unique solution with the smallest Euclidean norm:
+    Notice that $\mathbf{A} \mathbf{A}^+ = \mathbf{A} \mathbf{A}^T (\mathbf{A} \mathbf{A}^T)^{-1} = \mathbf{I}_m$. The system $\mathbf{A}\mathbf{x} = \mathbf{b}$ has infinitely many solutions, and $\hat{\mathbf{x}} = \mathbf{A}^+ \mathbf{b}$ selects the unique solution with the smallest Euclidean norm:
 
     $$
     \min_{\mathbf{x} \in \mathbb{R}^n} \|\mathbf{x}\|_2 \quad \text{subject to} \quad \mathbf{A}\mathbf{x} = \mathbf{b}
@@ -100,8 +118,6 @@ def _(mo):
     $$
 
     ---
-
-    ## 2. Applications in Modern AI and Machine Learning
 
     ### Implicit Bias in Overparameterized Models and Double Descent
 
@@ -148,6 +164,20 @@ def _(mo):
     $$
 
     where $\mathbf{Z} \in \mathbb{R}^{N \times d}$ contains the extracted embeddings and $\mathbf{Y} \in \mathbb{R}^{N \times C}$ represents the target labels.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ---
+
+    ## [c] Interactive Visualizations: Overdetermined vs Underdetermined Systems
+
+    The two figures below illustrate the geometric duality of the pseudoinverse:
+    1. **Overdetermined System (3D)**: Target vector $\mathbf{b}$ projected orthogonally onto the 2D column space $\text{col}(\mathbf{A})$. The residual $\mathbf{r} = \mathbf{b} - \mathbf{A}\mathbf{x}^+$ is strictly perpendicular to the plane.
+    2. **Underdetermined System (2D)**: The affine line of valid solutions $\mathbf{A}\mathbf{x} = \mathbf{b}$. The pseudoinverse selects $\mathbf{x}^+ = \mathbf{A}^+ \mathbf{b}$, which is the unique point on the line closest to the origin.
     """)
     return
 
@@ -270,7 +300,6 @@ def _(go, make_subplots, np):
     )
 
     # Panel 2: Underdetermined System (1 equation, 2 unknowns: 2*x1 + 3*x2 = 6)
-    # Solution line: x2 = (6 - 2*x1) / 3
     a_under = np.array([[2.0, 3.0]])
     b_val = 6.0
     x_min_norm = np.linalg.pinv(a_under) @ np.array([b_val])
@@ -386,7 +415,7 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ## 3. Code Verification and Applications
+    ## [d] Code Examples
 
     ### Example 1: Numerical Verification of the Four Penrose Conditions
 
