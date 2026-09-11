@@ -387,6 +387,7 @@ PROCESSED_NOTES: list[str] = [
     "38_oversampling.py",
     "39_permutation_importance.py",
     "40_pca_vs_feat_ag.py",
+    "41_pseudo_r2.py",
 ]
 
 
