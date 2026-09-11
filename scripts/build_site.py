@@ -388,6 +388,7 @@ PROCESSED_NOTES: list[str] = [
     "39_permutation_importance.py",
     "40_pca_vs_feat_ag.py",
     "41_pseudo_r2.py",
+    "42_multiclass_classification.py",
 ]
 
 
