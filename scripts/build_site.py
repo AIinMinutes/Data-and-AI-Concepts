@@ -381,6 +381,7 @@ PROCESSED_NOTES: list[str] = [
     "32_elastic_net.py",
     "33_huber_loss.py",
     "34_mahalanobis_distance.py",
+    "35_gini_impurity_vs_entropy.py",
 ]
 
 
