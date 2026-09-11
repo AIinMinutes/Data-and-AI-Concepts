@@ -398,6 +398,7 @@ PROCESSED_NOTES: list[str] = [
     "49_focal_loss_balanced.py",
     "50_attention_mechanism.py",
     "51_causal_attention.py",
+    "52_multi_head_attention.py",
 ]
 
 
