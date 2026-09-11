@@ -362,6 +362,7 @@ PROCESSED_NOTES: list[str] = [
     "13_unbiased_vs_consistent.py",
     "14_dist_of_minimum.py",
     "15_mutual_information.py",
+    "16_point_biserial.py",
 ]
 
 
