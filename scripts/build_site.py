@@ -402,6 +402,7 @@ PROCESSED_NOTES: list[str] = [
     "53_layer_and_rms_normalization.py",
     "54_decoding_strategies.py",
     "55_perplexity.py",
+    "56_reparametrization_trick.py",
 ]
 
 
