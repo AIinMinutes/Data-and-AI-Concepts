@@ -401,6 +401,7 @@ PROCESSED_NOTES: list[str] = [
     "52_multi_head_attention.py",
     "53_layer_and_rms_normalization.py",
     "54_decoding_strategies.py",
+    "55_perplexity.py",
 ]
 
 
