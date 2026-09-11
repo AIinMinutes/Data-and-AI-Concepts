@@ -363,6 +363,7 @@ PROCESSED_NOTES: list[str] = [
     "14_dist_of_minimum.py",
     "15_mutual_information.py",
     "16_point_biserial.py",
+    "17_jensen_inequality.py",
 ]
 
 
