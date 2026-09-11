@@ -369,6 +369,7 @@ PROCESSED_NOTES: list[str] = [
     "20_spurious_correlation.py",
     "21_kruskal_wallis.py",
     "22_acf_and_pacf.py",
+    "23_ewa_and_bias_correction.py",
 ]
 
 
