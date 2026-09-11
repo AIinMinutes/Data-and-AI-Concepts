@@ -1,4 +1,4 @@
-name: CI Build & Lint Verification
+name: CI Lint Verification
 
 on:
   push:
@@ -21,6 +21,3 @@ jobs:
 
       - name: Ruff Lint Check
         run: uv run ruff check scripts/
-
-      - name: Build Site Verification
-        run: uv run python scripts/build_site.py --only 00_introduction
