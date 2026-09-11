@@ -406,6 +406,7 @@ PROCESSED_NOTES: list[str] = [
     "57_autoencoder_latent_space.py",
     "58_pca_for_anomaly_detection.py",
     "59_vae_on_mnist.py",
+    "60_vae_anomaly_detection.py",
 ]
 
 
