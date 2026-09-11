@@ -357,6 +357,7 @@ PROCESSED_NOTES: list[str] = [
     "08_matrix_calculus_short.py",
     "09_condition_number.py",
     "10_chebyshev_inequality.py",
+    "11_ecdf.py",
 ]
 
 
