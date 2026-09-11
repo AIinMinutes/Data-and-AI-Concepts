@@ -360,6 +360,7 @@ PROCESSED_NOTES: list[str] = [
     "11_ecdf.py",
     "12_multivariate_normal_distribution.py",
     "13_unbiased_vs_consistent.py",
+    "14_dist_of_minimum.py",
 ]
 
 
