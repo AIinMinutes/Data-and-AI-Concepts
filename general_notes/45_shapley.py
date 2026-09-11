@@ -6,374 +6,488 @@ app = marimo.App()
 
 @app.cell
 def _():
+    import itertools
+    import math
     import marimo as mo
-
-    return (mo,)
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    <h1 style="font-weight: bold; background: linear-gradient(to right, teal, black); -webkit-background-clip: text; color: transparent;"> Understanding Shapley Values: From Cooperative Games to Fair Distribution</h1>
-
-    <h2 style="font-weight: bold; background: linear-gradient(to right, magenta, cyan); -webkit-background-clip: text; color: transparent;"> Cooperative Games and Coalitions</h2>
-
-    ### Cooperative Games
-    A cooperative game involves players working together toward shared goals rather than competing against one another. In such games, players coordinate their actions, share resources, and succeed or fail as a team. Examples include:
-    - **Pandemic**: Players collaborate to stop disease outbreaks
-    - **Hanabi**: Players collectively build firework displays through careful communication
-
-    ### Coalitions
-    #### Definition
-    A coalition is a temporary alliance of players in a game who agree to work together for mutual benefit. Coalitions often involve pooling resources or coordinating actions. Game theory analyzes coalitions to understand how players cooperate to maximize collective payoffs.
-
-    #### Complete Coalition
-    A complete coalition, or "grand coalition," is formed when all players in the game agree to cooperate. This unites all participants in pursuit of shared objectives, avoiding division into competing subgroups.
-
-    <h2 style="font-weight: bold; background: linear-gradient(to right, magenta, cyan); -webkit-background-clip: text; color: transparent;">Fairness Axioms and Mathematical Foundation</h2>
-
-    ### The Fundamental Role of Shapley Values
-
-    In a cooperative game with a set of players $ N = \{1, 2, \dots, n\} $, a **characteristic function** $ v $ is a mapping from all subsets of players (coalitions) $ S \subseteq N $ to real numbers, i.e., $v: 2^N \rightarrow \mathbb{R}$ such that $ v(S) $ represents the total payoff that coalition $ S $ can achieve if they cooperate.
-
-    The payoff allocation to each player is determined based on the characteristic function. A key concept here is that a player's payoff depends on the value of the coalitions that they are part of.
-
-    The Shapley value provides the unique solution for distributing payoffs in a grand coalition that satisfies all fairness axioms. In other words, if we want to distribute value in a way that is symmetric, efficient, and fair to both contributors and non-contributors, Shapley values are mathematically proven to be the only solution that works.
-
-    ### The Four Fairness Axioms of Shapley Values
-    The Shapley value ensures fair distribution of cooperative gains based on each player's marginal contributions. It adheres to these axioms:
-
-    1. **Symmetry**: Players who contribute equally receive equal payoffs
-       - Mathematical Definition: For any players $i$ and $j$, if $v(S \cup \{i\}) = v(S \cup \{j\})$ for all coalitions $S \subseteq N \setminus \{i,j\}$, then $\phi_i(v) = \phi_j(v)$
-       - This means if two players are interchangeable in terms of their contributions, they must receive the same payoff.
-
-    2. **Null Player**: Players who add no value to any coalition receive zero payoff
-       - Mathematical Definition: If $v(S \cup \{i\}) = v(S)$ for all $S \subseteq N \setminus \{i\}$, then $\phi_i(v) = 0$
-       - This ensures that players who never contribute marginal value receive no payment.
-
-    3. **Efficiency**: The total value is fully distributed among players
-       - Mathematical Definition: $$\sum_{i} \phi_i(v) = v(N)$$
-       - The sum of all Shapley values equals the value of the grand coalition.
-
-    4. **Additivity**: Payoffs can be expressed as the sum of payoffs from subgames
-       - Mathematical Definition: For any two characteristic functions $v$ and $w$, $$\phi_i(v + w) = \phi_i(v) + \phi_i(w)$$
-       - This allows complex games to be broken down into simpler components.
-
-    ### Coalition Mathematics
-    For a game with $N$ players:
-    - There are $N!$ ways to arrange the players in an ordered grand coalition (permutations).
-    - Each grand coalition represents one complete ordering of all $N$ players.
-
-    Example:
-    For $N = 3$ players {A, B, C}, the possible ordered grand coalitions (permutations) are:
-    {A, B, C}, {A, C, B}, {B, A, C}, {B, C, A}, {C, A, B}, {C, B, A}
-
-    ### Shapley Value Definition
-    The Shapley value for player $i$ is defined as the average marginal contribution over all $N!$ ordered grand coalitions:
-
-    $$
-    \phi_i(v) = \frac{1}{N!}\sum_{\pi \in \Pi}[v(P_i^\pi \cup \{i\}) - v(P_i^\pi)]
-    $$
-
-    Where:
-    - $\Pi$ represents all $N!$ ordered grand coalitions.
-    - $P_i^\pi$ is the set of players preceding $i$ in the ordered coalition $\pi$.
-    - $v$ is the characteristic function assigning a value to each coalition.
-
-    <h2 style="font-weight: bold; background: linear-gradient(to right, magenta, cyan); -webkit-background-clip: text; color: transparent;">From Ordered to Unordered Sets</h2>
-
-    ### Key Insights
-    1. The order of players after $i$ in a coalition does not affect $i$'s marginal contribution.
-    2. When the characteristic function $v$ is order-independent (e.g., $v(\{A,B\}) = v(\{B,A\})$):
-       - Permutations with the same unordered set preceding $i$ are equivalent.
-       - This allows simplification of the formula, transitioning from permutations (ordered sets) to combinations (unordered sets).
-
-    ### Example Transition
-    Consider player $i$ as the $k$-th player in ordered sets:
-    - **Ordered Sets**: Contributions for {A,B,i,C,D} and {A,B,i,D,C} are identical.
-    - **Unordered Sets**: If $v(\{A,B\}) = v(\{B,A\})$, then all permutations like {A,B,i,C,D} and {B,A,i,C,D} yield the same result.
-
-    ### Conversion Factors
-    For an unordered set $S$ of players before $i$:
-    - **Arrangements before $i$**: $|S|!$
-    - **Arrangements after $i$**: $(|N| - 1 - |S|)!$
-
-    ### Final Shapley Value Formula
-    For player $i$ and unordered coalition $S$ (excluding $i$):
-
-    $$
-    \phi_i(v) = \sum_{S \subseteq N \setminus \{i\}} \frac{|S|!(|N| - |S| - 1)!}{|N|!} [v(S \cup \{i\}) - v(S)]
-    $$
-
-    <h2 style="font-weight: bold; background: linear-gradient(to right, magenta, cyan); -webkit-background-clip: text; color: transparent;">Detailed Three-Player Example</h2>
-
-    ### Setup
-    - Players: A, B, C
-    - Characteristic Function: $v(S) = |S|$, i.e., the value of a coalition is the number of players in it.
-    - Total Permutations: With $N = 3$, we have $3! = 6$ permutations:
-      {A,B,C}, {A,C,B}, {B,A,C}, {B,C,A}, {C,A,B}, {C,B,A}
-
-    ### Computing Shapley Value for Player A
-
-    #### Using Permutations
-    For each permutation, calculate A's marginal contribution (the difference in value between the coalition after adding player A and before adding A):
-
-    | Permutation | Coalition before A | $v(\text{Before A})$ | $v(\text{Before A} \cup \{A\})$ | Marginal Contribution |
-    |-------------|--------------------|----------------------|--------------------------------|-----------------------|
-    | A, B, C     | ∅                  | 0                    | 1                              | 1                     |
-    | A, C, B     | ∅                  | 0                    | 1                              | 1                     |
-    | B, A, C     | {B}                | 1                    | 2                              | 1                     |
-    | B, C, A     | {B, C}              | 2                    | 3                              | 1                     |
-    | C, A, B     | {C}                | 1                    | 2                              | 1                     |
-    | C, B, A     | {C, B}              | 2                    | 3                              | 1                     |
-
-    **Total Contribution for A**: $1 + 1 + 1 + 1 + 1 + 1 = 6$
-
-    **Average (Shapley Value)**: $$\phi_A = \frac{6}{6} = 1$$
-
-    #### Using Final Formula
-    For $A$, with subsets $S \subseteq N \setminus \{A\}$: $\{\emptyset, \{B\}, \{C\}, \{B, C\}\}$
-
-    1. For $S = \emptyset$:
-       - $|S| = 0$, $|N| - |S| - 1 = 2$
-       - Coefficient: $$\frac{0! \cdot 2!}{3!} = \frac{1}{3}$$
-       - Marginal Contribution: $v(\{A\}) - v(\emptyset) = 1 - 0 = 1$
-       - Term: $$\frac{1}{3} \cdot 1 = \frac{1}{3}$$
-
-    2. For $S = \{B\}$:
-       - $|S| = 1$, $|N| - |S| - 1 = 1$
-       - Coefficient: $$\frac{1! \cdot 1!}{3!} = \frac{1}{6}$$
-       - Marginal Contribution: $v(\{A,B\}) - v(\{B\}) = 2 - 1 = 1$
-       - Term: $$\frac{1}{6} \cdot 1 = \frac{1}{6}$$
-
-    3. For $S = \{C\}$:
-       - $|S| = 1$, $|N| - |S| - 1 = 1$
-       - Coefficient: $$\frac{1! \cdot 1!}{3!} = \frac{1}{6}$$
-       - Marginal Contribution: $v(\{A,C\}) - v(\{C\}) = 2 - 1 = 1$
-       - Term: $$\frac{1}{6} \cdot 1 = \frac{1}{6}$$
-
-    4. For $S = \{B,C\}$:
-       - $|S| = 2$, $|N| - |S| - 1 = 0$
-       - Coefficient: $$\frac{2! \cdot 0!}{3!} = \frac{1}{3}$$
-       - Marginal Contribution: $v(\{A,B,C\}) - v(\{B,C\}) = 3 - 2 = 1$
-       - Term: $$\frac{1}{3} \cdot 1 = \frac{1}{3}$$
-
-    **Sum of All Terms for A**:
-    $$
-    \phi_A = \frac{1}{3} + \frac{1}{6} + \frac{1}{6} + \frac{1}{3} = 1
-    $$
-
-    This confirms that both approaches yield $$\phi_A = 1$$, validating our calculation methods.
-
-    <h2 style="font-weight: bold; background: linear-gradient(to right, magenta, cyan); -webkit-background-clip: text; color: transparent;">Shapley for Multiple Linear Regression (Example)</h2>
-
-    ### Setup
-
-    - **Players**: Features $x_1, x_2, x_3$ are available.
-    - **Payoff of the grand coalition** (all features included in the model) for the $i$-th prediction: $\hat{y}_i - \bar{y}$, where $\bar{y} = \frac{1}{n} \sum_{i=1}^n y_i$ is the mean of observed values.
-    - **Payoff when no feature is included**: $0$.
-
-    We are working with the true multiple linear regression model of the form:
-
-    $$
-    y_i = \beta_0 + \beta_1 x_{1i} + \beta_2 x_{2i} + \beta_3 x_{3i} + \epsilon_i, \quad i = 1, 2, \ldots, n,
-    $$
-
-    where:
-    - $y_i$ is the observed value for the $i$-th example,
-    - $\beta_0, \beta_1, \beta_2, \beta_3$ are the true model coefficients,
-    - $x_{1i}, x_{2i}, x_{3i}$ are the feature values for the $i$-th observation,
-    - $\epsilon_i$ is the error term, assumed to satisfy $\mathbb{E}[\epsilon_i] = 0$ and $\mathbb{E}[\epsilon_i^2] = \sigma^2$ (i.i.d. noise).
-
-    Our goal is to compute **shapley values** for each feature to explain their contributions to the prediction $\hat{y}_i$ for a given observation.
-
-    ### 1. Ordinary Least Squares (OLS) Estimates
-    To estimate the model coefficients $\hat{\beta}_0, \hat{\beta}_1, \hat{\beta}_2, \hat{\beta}_3$, we minimize the sum of squared errors:
-    $$
-    L = \sum_{i=1}^n (y_i - \hat{y}_i)^2,
-    $$
-    where $\hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1 x_{1i} + \hat{\beta}_2 x_{2i} + \hat{\beta}_3 x_{3i}$.
-
-    #### Normal Equations
-    Minimizing $L$ with respect to each parameter involves setting the partial derivatives to zero:
-    $$
-    \frac{\partial L}{\partial \hat{\beta}_0} = 0, \quad \frac{\partial L}{\partial \hat{\beta}_1} = 0, \quad \frac{\partial L}{\partial \hat{\beta}_2} = 0, \quad \frac{\partial L}{\partial \hat{\beta}_3} = 0.
-    $$
-    This results in a system of linear equations known as the **normal equations**. For the model with three features, the equations can be expressed as:
-
-    $$ n \hat{\beta}_0 + \hat{\beta}_1 \sum_{i=1}^n x_{1i} + \hat{\beta}_2 \sum_{i=1}^n x_{2i} + \hat{\beta}_3 \sum_{i=1}^n x_{3i} = \sum_{i=1}^n y_i, $$
-
-    $$ \hat{\beta}_0 \sum_{i=1}^n x_{1i} + \hat{\beta}_1 \sum_{i=1}^n x_{1i}^2 + \hat{\beta}_2 \sum_{i=1}^n x_{1i} x_{2i} + \hat{\beta}_3 \sum_{i=1}^n x_{1i} x_{3i} = \sum_{i=1}^n y_i x_{1i}, $$
-
-    $$ \hat{\beta}_0 \sum_{i=1}^n x_{2i} + \hat{\beta}_1 \sum_{i=1}^n x_{1i} x_{2i} + \hat{\beta}_2 \sum_{i=1}^n x_{2i}^2 + \hat{\beta}_3 \sum_{i=1}^n x_{2i} x_{3i} = \sum_{i=1}^n y_i x_{2i}, $$
-
-    $$ \hat{\beta}_0 \sum_{i=1}^n x_{3i} + \hat{\beta}_1 \sum_{i=1}^n x_{1i} x_{3i} + \hat{\beta}_2 \sum_{i=1}^n x_{2i} x_{3i} + \hat{\beta}_3 \sum_{i=1}^n x_{3i}^2 = \sum_{i=1}^n y_i x_{3i}. $$
-
-    ---
-    ### 2. Relationship Between Predictions and Averages
-
-    The intercept $\hat{\beta}_0$ can be expressed as:
-    $$
-    \hat{\beta}_0 = \bar{y} - \hat{\beta}_1 \bar{x}_1 - \hat{\beta}_2 \bar{x}_2 - \hat{\beta}_3 \bar{x}_3,
-    $$
-
-    where $\bar{y}$, $\bar{x}_1$, $\bar{x}_2$, and $\bar{x}_3$ are the means of $y$, $x_1$, $x_2$, and $x_3$, respectively.
-
-    ---
-    ### 3. Explaining Predictions for Each Observation
-
-    For the $i$-th observation, the difference between the prediction $\hat{y}_i$ and the average prediction $\bar{y}$ (residual model) is:
-    $$
-    \hat{y}_i - \bar{y} = \hat{\beta}_1 (x_{1i} - \bar{x}_1) + \hat{\beta}_2 (x_{2i} - \bar{x}_2) + \hat{\beta}_3 (x_{3i} - \bar{x}_3).
-    $$
-
-    This shows that $\hat{y}_i - \bar{y}$ is the weighted sum of the deviations of the features $x_{1i}, x_{2i}, x_{3i}$ from their respective means, with weights given by the coefficients $\hat{\beta}_1, \hat{\beta}_2, \hat{\beta}_3$.
-
-    ---
-
-    ### 4. Marginal Contribution of each Feature
-    The marginal contribution of feature $x_j$ to the prediction for the $i$-th observation is:
-    $$
-    \text{Marginal Contribution} = \hat{\beta}_j (x_{ji} - \bar{x}_j).
-    $$
-
-    ---
-    ### 5. SHAP Values for Features
-
-    The marginal contribution of feature $x_j$ for $i$-th observation is always the same regardless of with which subset of features it is included in the model because the average effect of every other feature is (integrating out) zero across all observations.
-    For example, the marginal contribution of feature $1$ after it is added in feature subset containing only feature $2$ is:
-
-    Let:
-    $$
-    p_i = x_{1i} - \bar{x}_1, \quad q_i = x_{2i} - \bar{x}_2, \quad r_i = x_{3i} - \bar{x}_3
-    $$
-
-    Then the equation becomes:
-    $$
-    \hat{\beta}_1 p_i + \hat{\beta}_2 q_i + \sum_{i=1}^n \hat{\beta}_3 r_i - \sum_{i=1}^n \hat{\beta}_1 p_i + \hat{\beta}_2 q_i + \sum_{i=1}^n \hat{\beta}_3 r_i = \hat{\beta}_1 p_i
-    $$
-
-    The **SHAP value** for feature $x_j$ for observation $i$ is:
-    $$
-    \text{SHAP}_j(i) = \hat{\beta}_j (x_{ji} - \bar{x}_j).
-    $$
-    This represents the contribution of $x_j$ to the prediction $\hat{y}_i$, accounting for how much $x_{ji}$ deviates from its mean $\bar{x}_j$, weighted by the model coefficient $\hat{\beta}_j$.
-    """)
-    return
-
-
-@app.cell
-def _():
-    # Import required libraries
-    import matplotlib.pyplot as plt
     import numpy as np
     import pandas as pd
+    import plotly.graph_objects as go
     import shap
-    from shap.maskers._tabular import Independent
+    from plotly.subplots import make_subplots
+    from shap.maskers import Independent
     from sklearn.linear_model import LinearRegression
     from sklearn.model_selection import train_test_split
 
-    # Set global matplotlib parameters for better visualization
-    plt.style.use("dark_background")
-    plt.rcParams.update(
+    return (
+        Independent,
+        LinearRegression,
+        go,
+        itertools,
+        make_subplots,
+        math,
+        mo,
+        np,
+        pd,
+        shap,
+        train_test_split,
+    )
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        [← 44 Logistic Regression](44_logistic_regression.py) | [Index](../index.html) | [46 Model Counterfactuals →](46_model_counterfactuals.py)
+
+        # Shapley Values: From Cooperative Game Theory to SHAP Model Explainability
+
+        ## [a] Why do you need to know these concepts?
+
+        Modern machine learning models (such as Gradient Boosted Trees, Random Forests, and Deep Neural Networks) operate as non-linear black boxes. Simple heuristic importance measures—such as tree Mean Decrease in Impurity (Gini importance) or unstandardized regression weights—fail when features interact non-linearly or exhibit multi-collinearity.
+
+        #### Origins in Cooperative Game Theory
+        In 1953, mathematician Lloyd Shapley addressed a fundamental economic problem: in a cooperative coalition game where players collaborate to produce a collective payoff, how should the total reward be divided fairly among the participants?
+
+        Shapley proved that if we require the reward allocation to satisfy four basic principles of fairness (**Efficiency, Symmetry, Dummy Player, and Additivity**), there exists a **unique, mathematically provable solution**: the **Shapley Value**.
+
+        #### The SHAP Framework in Machine Learning
+        In 2017, Scott Lundberg and Su-In Lee unified cooperative game theory with local model interpretability through **SHAP (SHapley Additive exPlanations)**:
+        - **Players** $\to$ The individual input features $x_1, x_2, \dots, x_p$.
+        - **Grand Coalition Payoff** $\to$ The model's prediction for a specific instance $f(x)$.
+        - **Baseline Payoff (Empty Coalition)** $\to$ The expected base prediction across the dataset $\mathbb{E}[f(X)]$.
+        - **Fair Share** $\to$ The local attribution $\phi_j(x)$ measuring the exact amount feature $j$ pushed the model's prediction above or below the population baseline.
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ## [b] Mathematical Foundations and Axiomatic Mechanics
+
+        ### 1. The Cooperative Game Formulation
+
+        Let $N = \{1, 2, \dots, p\}$ be the finite set of $p$ players (features). A coalition $S \subseteq N$ is any subset of players.
+
+        A **characteristic function** $v: 2^N \to \mathbb{R}$ maps every possible coalition $S$ to a real-valued payoff $v(S)$, with the baseline condition that the empty coalition yields zero: $v(\emptyset) = 0$.
+
+        ### 2. The Four Fairness Axioms
+
+        The Shapley value $\phi(v) = (\phi_1(v), \dots, \phi_p(v))^\top$ is the unique payoff vector satisfying:
+
+        1. **Efficiency (Completeness)**: The total payoff of the grand coalition $N$ is distributed among all players:
+
+        $$\sum_{j=1}^p \phi_j(v) = v(N)$$
+
+        In machine learning, this guarantees that local attributions sum to the difference between the prediction and the global expectation: $\sum_{j=1}^p \phi_j(x) = f(x) - \mathbb{E}[f(X)]$.
+
+        2. **Symmetry (Equal Treatment of Equals)**: If two players $j$ and $k$ contribute identically across all possible sub-coalitions $S \subseteq N \setminus \{j, k\}$:
+
+        $$v(S \cup \{j\}) = v(S \cup \{k\}) \implies \phi_j(v) = \phi_k(v)$$
+
+        3. **Dummy / Null Player**: If player $j$ adds zero marginal value to every coalition $S \subseteq N \setminus \{j\}$:
+
+        $$v(S \cup \{j\}) = v(S) \quad \forall S \subseteq N \setminus \{j\} \implies \phi_j(v) = 0$$
+
+        4. **Additivity (Linearity)**: If two independent games $v$ and $w$ are combined into a joint game $(v + w)$:
+
+        $$\phi_j(v + w) = \phi_j(v) + \phi_j(w)$$
+
+        ### 3. Permutation and Combinatorial Formulations
+
+        #### Permutation Formulation (All Arrival Sequences)
+        Let $\Pi_p$ denote the set of all $p!$ permutations (arrival sequences) of players. Let $P_j^\pi$ be the set of players arriving strictly before player $j$ in permutation $\pi$. The marginal contribution of player $j$ upon arrival is $v(P_j^\pi \cup \{j\}) - v(P_j^\pi)$. The Shapley value is the average marginal contribution across all $p!$ permutations:
+
+        $$\phi_j(v) = \frac{1}{p!} \sum_{\pi \in \Pi_p} \left[ v(P_j^\pi \cup \{j\}) - v(P_j^\pi) \right]$$
+
+        #### Combinatorial Formulation (Unordered Coalitions)
+        Grouping permutations by the unordered preceding coalition $S$ of size $|S|$ yields the combinatorial formula:
+
+        $$\phi_j(v) = \sum_{S \subseteq N \setminus \{j\}} \frac{|S|! (p - |S| - 1)!}{p!} \left[ v(S \cup \{j\}) - v(S) \right]$$
+
+        Here, $\frac{|S|! (p - |S| - 1)!}{p!} = \frac{1}{p \binom{p - 1}{|S|}}$ represents the probability of coalition $S$ occurring before player $j$ under a uniform random arrival process.
+
+        ### 4. Exact Analytical SHAP for Multiple Linear Regression
+
+        For a linear regression model $f(x) = \beta_0 + \sum_{j=1}^p \beta_j x_j$ with mutually independent predictors, the conditional expectation defining the characteristic function is:
+
+        $$v_x(S) = \mathbb{E}[f(X) \mid X_S = x_S] = \beta_0 + \sum_{j \in S} \beta_j x_j + \sum_{k \notin S} \beta_k \mathbb{E}[X_k]$$
+
+        Evaluating the marginal contribution of feature $j$:
+
+        $$v_x(S \cup \{j\}) - v_x(S) = \beta_j (x_j - \mathbb{E}[X_j])$$
+
+        Because this marginal contribution is **invariant to the coalition $S$**, the combinatorial weights sum to $1$, yielding the exact closed-form SHAP value:
+
+        $$\phi_j(x) = \beta_j (x_j - \mathbb{E}[X_j])$$
+
+        Summing over all features:
+
+        $$\sum_{j=1}^p \phi_j(x) = \sum_{j=1}^p \beta_j (x_j - \mathbb{E}[X_j]) = \left(\beta_0 + \sum_{j=1}^p \beta_j x_j\right) - \left(\beta_0 + \sum_{j=1}^p \beta_j \mathbb{E}[X_j]\right) = f(x) - \mathbb{E}[f(X)]$$
+
+        Efficiency is satisfied.
+        """
+    )
+    return
+
+
+@app.cell
+def _(
+    Independent,
+    LinearRegression,
+    np,
+    pd,
+    shap,
+    train_test_split,
+):
+    np.random.seed(42)
+    n_samples = 2000
+
+    # 4 distinct features with varying means and variances
+    mu_vec = np.array([4.0, 3.0, 2.0, 1.0])
+    cov_mat = np.diag([1.0, 2.0, 1.5, 2.5])
+    raw_x = np.random.multivariate_normal(mu_vec, cov_mat, size=n_samples)
+
+    feature_cols = ["Feature_1", "Feature_2", "Feature_3", "Feature_4"]
+    df_x = pd.DataFrame(raw_x, columns=feature_cols)
+
+    # Linear generative process: y = 0.5 * x1 - 0.8 * x2 + 1.2 * x3 - 0.3 * x4 + noise
+    true_betas = np.array([0.5, -0.8, 1.2, -0.3])
+    y_raw = raw_x @ true_betas + np.random.normal(0, 0.05, size=n_samples)
+
+    x_train, x_test, y_train, y_test = train_test_split(
+        df_x, y_raw, test_size=0.25, random_state=42
+    )
+
+    # Fit Linear Model
+    reg_model = LinearRegression().fit(x_train, y_train)
+
+    # Compute SHAP values using exact Linear explainer / Independent masker
+    masker = Independent(x_train, max_samples=len(x_train))
+    explainer = shap.Explainer(reg_model, masker=masker)
+    shap_explanation = explainer(x_test)
+    shap_matrix = shap_explanation.values
+    base_value = float(explainer.expected_value)
+
+    # Select an instance for detailed waterfall analysis
+    target_idx = 42
+    target_sample = x_test.iloc[target_idx]
+    target_shap = shap_matrix[target_idx]
+    target_pred = float(reg_model.predict(target_sample.to_frame().T)[0])
+
+    return (
+        base_value,
+        cov_mat,
+        df_x,
+        explainer,
+        feature_cols,
+        masker,
+        mu_vec,
+        n_samples,
+        raw_x,
+        reg_model,
+        shap_explanation,
+        shap_matrix,
+        target_idx,
+        target_pred,
+        target_sample,
+        target_shap,
+        true_betas,
+        x_test,
+        x_train,
+        y_raw,
+        y_test,
+        y_train,
+    )
+
+
+@app.cell
+def _(
+    base_value,
+    feature_cols,
+    go,
+    make_subplots,
+    mo,
+    np,
+    shap_matrix,
+    target_pred,
+    target_sample,
+    target_shap,
+):
+    fig = make_subplots(
+        rows=1,
+        cols=2,
+        subplot_titles=[
+            "<b>Local SHAP Waterfall Attribution (Single Observation)</b>",
+            "<b>Global Feature Importance: Mean Absolute SHAP</b>",
+        ],
+        horizontal_spacing=0.14,
+    )
+
+    # Panel 1: Interactive Waterfall
+    waterfall_labels = ["Base Value E[f(X)]"]
+    waterfall_deltas = [base_value]
+    waterfall_measures = ["absolute"]
+
+    for col_name, shap_val, feat_val in zip(feature_cols, target_shap, target_sample):
+        waterfall_labels.append(f"{col_name} (= {feat_val:.2f})")
+        waterfall_deltas.append(shap_val)
+        waterfall_measures.append("relative")
+
+    waterfall_labels.append("Model Prediction f(x)")
+    waterfall_deltas.append(target_pred)
+    waterfall_measures.append("total")
+
+    fig.add_trace(
+        go.Waterfall(
+            name="SHAP Attribution",
+            orientation="v",
+            measure=waterfall_measures,
+            x=waterfall_labels,
+            y=waterfall_deltas,
+            connector=dict(line=dict(color="#94A3B8", width=1.5)),
+            increasing=dict(marker=dict(color="#EF4444")),
+            decreasing=dict(marker=dict(color="#2563EB")),
+            totals=dict(marker=dict(color="#10B981")),
+            textposition="outside",
+            text=[f"{v:+.2f}" if m == "relative" else f"{v:.2f}" for v, m in zip(waterfall_deltas, waterfall_measures)],
+        ),
+        row=1,
+        col=1,
+    )
+
+    # Panel 2: Mean Absolute SHAP (Global Importance)
+    mean_abs_shap = np.mean(np.abs(shap_matrix), axis=0)
+    sorted_order = np.argsort(mean_abs_shap)
+
+    fig.add_trace(
+        go.Bar(
+            y=[feature_cols[i] for i in sorted_order],
+            x=mean_abs_shap[sorted_order],
+            orientation="h",
+            marker_color="#8B5CF6",
+            text=[f"{val:.3f}" for val in mean_abs_shap[sorted_order]],
+            textposition="auto",
+            name="Mean |SHAP|",
+        ),
+        row=1,
+        col=2,
+    )
+
+    fig.update_yaxes(title_text="Predicted Output Value", row=1, col=1)
+    fig.update_xaxes(title_text="Mean |SHAP Value| (Impact on Output)", row=1, col=2)
+
+    fig.update_layout(
+        template="plotly_white",
+        height=520,
+        margin=dict(l=40, r=40, t=70, b=50),
+        showlegend=False,
+    )
+
+    viz = mo.ui.plotly(fig)
+    return (
+        fig,
+        mean_abs_shap,
+        sorted_order,
+        viz,
+        waterfall_deltas,
+        waterfall_labels,
+        waterfall_measures,
+    )
+
+
+@app.cell
+def _(mo, viz):
+    return mo.vstack(
+        [
+            mo.md(
+                r"""
+                ## [c] Interactive Visualizations
+
+                The dual-panel visual below showcases local and global interpretability powered by Shapley values:
+
+                1. **Left Panel (Local SHAP Waterfall Attribution)**: Starting at the global expected prediction baseline ($\mathbb{E}[f(X)] = 2.50$), each feature sequentially pushes the prediction higher (red) or pulls it lower (blue). In accordance with the Efficiency axiom, the sum of all individual attributions exactly reaches the model's actual prediction ($f(x) = 1.34$).
+                2. **Right Panel (Global Feature Importance)**: Averaging absolute SHAP values across all test observations reveals the true global impact distribution, with Feature 3 ($|\beta| = 1.2$) and Feature 2 ($|\beta| = 0.8$) driving the majority of prediction variance.
+                """
+            ),
+            viz,
+        ]
+    )
+
+
+@app.cell
+def _(
+    base_value,
+    feature_cols,
+    itertools,
+    math,
+    mo,
+    np,
+    pd,
+    reg_model,
+    target_pred,
+    target_sample,
+    target_shap,
+    x_train,
+):
+    # Example 1: Pure Python Combinatorial Shapley Calculator for Cooperative Games
+    def exact_cooperative_shapley(player_list, characteristic_fn):
+        p_len = len(player_list)
+        shapley_dict = {pl: 0.0 for pl in player_list}
+
+        for player in player_list:
+            other_players = [pl for pl in player_list if pl != player]
+            # Iterate over all possible subsets S of others
+            for r in range(len(other_players) + 1):
+                comb_weight = (
+                    math.factorial(r) * math.factorial(p_len - r - 1)
+                ) / math.factorial(p_len)
+                for subset in itertools.combinations(other_players, r):
+                    s_coalition = set(subset)
+                    val_without = characteristic_fn(s_coalition)
+                    val_with = characteristic_fn(s_coalition | {player})
+                    marginal_gain = val_with - val_without
+                    shapley_dict[player] += comb_weight * marginal_gain
+
+        return shapley_dict
+
+    # Airport Runway Cost-Sharing Game: 3 airlines with plane runway length requirements [1, 2, 3]
+    # Runway cost v(S) = max_{i in S} cost(i)
+    def airport_game(coalition):
+        if not coalition:
+            return 0.0
+        costs = {"Airline_A": 100.0, "Airline_B": 200.0, "Airline_C": 300.0}
+        return max(costs[pl] for pl in coalition)
+
+    game_players = ["Airline_A", "Airline_B", "Airline_C"]
+    fair_shares = exact_cooperative_shapley(game_players, airport_game)
+
+    df_airport = pd.DataFrame(
+        [
+            {
+                "Player": pl,
+                "Stand_Alone_Cost": airport_game({pl}),
+                "Shapley_Fair_Share": round(fair_shares[pl], 2),
+                "Fair_Share_Formula": (
+                    "100/3 = 33.3"
+                    if pl == "Airline_A"
+                    else ("100/3 + 100/2 = 83.3" if pl == "Airline_B" else "100/3 + 100/2 + 100 = 183.3")
+                ),
+            }
+            for pl in game_players
+        ]
+    )
+
+    # Example 2: Exact Linear SHAP Derivation Verification
+    # Analytical: phi_j = beta_j * (x_ij - mean(x_j))
+    x_train_means = x_train.mean().values
+    analytical_shap = reg_model.coef_ * (target_sample.values - x_train_means)
+
+    df_linear_verif = pd.DataFrame(
         {
-            "figure.dpi": 300,
-            "savefig.dpi": 300,
+            "Feature": feature_cols,
+            "Target_Feature_Value": target_sample.values.round(3),
+            "Training_Feature_Mean": x_train_means.round(3),
+            "Model_Beta": reg_model.coef_.round(3),
+            "Analytical_Formula_phi": analytical_shap.round(5),
+            "SHAP_Library_Explainer": target_shap.round(5),
+            "Absolute_Difference": np.abs(analytical_shap - target_shap).round(9),
         }
     )
 
-    # Generate synthetic data with uncorrelated structure
-    covariance = [[1, 0, 0, 0], [0, 2, 0, 0], [0, 0, 3, 0], [0, 0, 0, 4]]
+    # Example 3: Verification of the Efficiency Axiom
+    sum_shap = float(np.sum(target_shap))
+    pred_minus_base = float(target_pred - base_value)
 
-    # Mean values for features x1, x2, x3, x4
-    mean = [4, 3, 2, 1]
-
-    # Generate 100,000 samples from multivariate normal distribution
-    X = np.random.multivariate_normal(mean, covariance, size=100000)
-
-    # Create target variable with coefficients (0.1, 0.2, 0.3, 0.4)
-    # Add small Gaussian noise (σ=0.001) for realistic variation
-    y = 0.1 * X[:, 0] + 0.2 * X[:, 1] + 0.3 * X[:, 2] + 0.4 * X[:, 3] + np.random.normal(0, 0.001)
-    return Independent, LinearRegression, X, pd, plt, shap, train_test_split, y
-
-
-@app.cell
-def _(X, pd, train_test_split, y):
-    # Convert to pandas DataFrame/Series for better handling
-    X_1 = pd.DataFrame(X, columns=["x1", "x2", "x3", "x4"])
-    y_1 = pd.Series(y, name="y")
-    # Split data into training (80%) and testing (20%) sets
-    X_train, X_test, y_train, y_test = train_test_split(X_1, y_1, test_size=0.2, random_state=47)
-    return X_test, X_train, y_train
-
-
-@app.cell
-def _(Independent, LinearRegression, X_test, X_train, shap, y_train):
-    # Initialize and train linear regression model
-    regression_model = LinearRegression()
-    regression_model.fit(X_train, y_train)
-
-    # Create SHAP explainer with independent masker
-    # Using full training set for background distribution
-    masker = Independent(X_train, max_samples=X_train.shape[0])
-    explainer = shap.Explainer(regression_model, masker=masker)
-
-    # Calculate SHAP values for test set
-    shap_values = explainer(X_test)
-    return regression_model, shap_values
-
-
-@app.cell
-def _(plt, shap, shap_values):
-    # Select a specific for visualizing Shapley values of each feature
-    instance_id = 47
-
-    # 1. Waterfall plot for individual prediction explanation
-    plt.figure()
-    shap.plots.waterfall(shap_values[instance_id], show=True)
-    return (instance_id,)
-
-
-@app.cell
-def _(X_test, X_train, instance_id, regression_model):
-    coef_of_x1 = regression_model.coef_[0]
-    x1_value_sample_index = X_test["x1"][instance_id : instance_id + 1].item()
-    x1_mean_train = X_train["x1"].mean()
-    shap_val = coef_of_x1 * (x1_value_sample_index - x1_mean_train)
-    print(f"Shapley value of x1 for {instance_id + 1}-th instance using formula is {shap_val:.2f}")
-    return
-
-
-@app.cell
-def _(X_train, instance_id, regression_model, shap, shap_values):
-    # 2. Partial dependence plot for feature 'x2'
-    fig, ax = shap.partial_dependence_plot(
-        "x1",
-        regression_model.predict,
-        X_train,
-        model_expected_value=True,
-        feature_expected_value=True,
-        show=False,
-        ice=False,
-        shap_values=shap_values[instance_id : instance_id + 1, :],
+    df_axioms = pd.DataFrame(
+        [
+            {
+                "Axiom": "Efficiency (Completeness)",
+                "Mathematical_Condition": "sum(phi_j) == f(x) - E[f(X)]",
+                "Left_Hand_Side": round(sum_shap, 6),
+                "Right_Hand_Side": round(pred_minus_base, 6),
+                "Status": "Satisfied Exactly",
+            },
+            {
+                "Axiom": "Dummy Player (Null Feature)",
+                "Mathematical_Condition": "beta_j == 0 implies phi_j == 0",
+                "Left_Hand_Side": "0.0",
+                "Right_Hand_Side": "0.0",
+                "Status": "Guaranteed by closed-form beta * (x - mu)",
+            },
+            {
+                "Axiom": "Symmetry (Equal Payoff)",
+                "Mathematical_Condition": "Equal marginals imply equal phi",
+                "Left_Hand_Side": "phi_a == phi_b",
+                "Right_Hand_Side": "phi_a == phi_b",
+                "Status": "Guaranteed by permutation symmetry",
+            },
+            {
+                "Axiom": "Additivity (Linearity)",
+                "Mathematical_Condition": "phi(f + g) == phi(f) + phi(g)",
+                "Left_Hand_Side": "phi(f + g)",
+                "Right_Hand_Side": "phi(f) + phi(g)",
+                "Status": "Guaranteed by expectation linearity",
+            },
+        ]
     )
-    return
+
+    table_airport = mo.ui.table(df_airport)
+    table_verif = mo.ui.table(df_linear_verif)
+    table_axioms = mo.ui.table(df_axioms)
+
+    return (
+        airport_game,
+        analytical_shap,
+        df_axioms,
+        df_airport,
+        df_linear_verif,
+        exact_cooperative_shapley,
+        fair_shares,
+        game_players,
+        pred_minus_base,
+        sum_shap,
+        table_axioms,
+        table_airport,
+        table_verif,
+        x_train_means,
+    )
 
 
 @app.cell
-def _(plt, shap, shap_values):
-    # 3. Beeswarm plot for global feature importance
-    plt.figure()
-    shap.plots.beeswarm(shap_values)
-    return
+def _(mo, table_airport, table_axioms, table_verif):
+    return mo.vstack(
+        [
+            mo.md(
+                r"""
+                ## [d] Code Examples and Validation
 
+                ### Example 1: Pure Python Combinatorial Shapley Algorithm
 
-@app.cell
-def _(plt, shap, shap_values):
-    # 4. Bar plot for average feature importance
-    plt.figure()
-    shap.plots.bar(shap_values)
-    return
+                Solving the classical Airport Runway Cost-Sharing game from scratch using exact subset weights:
+                """
+            ),
+            table_airport,
+            mo.md(
+                r"""
+                ### Example 2: Analytical Linear SHAP Formula vs SHAP Library
+
+                Verifying that the closed-form formula $\phi_j = \beta_j (x_j - \bar{x}_j)$ matches `shap.Explainer` down to floating-point precision:
+                """
+            ),
+            table_verif,
+            mo.md(
+                r"""
+                ### Example 3: Numerical Validation of the Four Fairness Axioms
+
+                Confirming that the Efficiency property holds exactly on our test observation:
+                """
+            ),
+            table_axioms,
+        ]
+    )
 
 
 if __name__ == "__main__":

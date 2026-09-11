@@ -391,6 +391,7 @@ PROCESSED_NOTES: list[str] = [
     "42_multiclass_classification.py",
     "43_energy.py",
     "44_logistic_regression.py",
+    "45_shapley.py",
 ]
 
 
