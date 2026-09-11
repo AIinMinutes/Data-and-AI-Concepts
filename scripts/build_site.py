@@ -410,6 +410,7 @@ PROCESSED_NOTES: list[str] = [
     "61_user_item_interaction_matrix.py",
     "62_grammar_of_graphics.py",
     "63_einsum.py",
+    "64_pivoting.py",
 ]
 
 
