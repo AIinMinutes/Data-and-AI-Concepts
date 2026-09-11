@@ -364,6 +364,7 @@ PROCESSED_NOTES: list[str] = [
     "15_mutual_information.py",
     "16_point_biserial.py",
     "17_jensen_inequality.py",
+    "18_cramer_v.py",
 ]
 
 
