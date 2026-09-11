@@ -384,6 +384,7 @@ PROCESSED_NOTES: list[str] = [
     "35_gini_impurity_vs_entropy.py",
     "36_agglomerative_clustering.py",
     "37_natural_breaks.py",
+    "38_oversampling.py",
 ]
 
 
