@@ -367,6 +367,7 @@ PROCESSED_NOTES: list[str] = [
     "18_cramer_v.py",
     "19_kendalltaub.py",
     "20_spurious_correlation.py",
+    "21_kruskal_wallis.py",
 ]
 
 
