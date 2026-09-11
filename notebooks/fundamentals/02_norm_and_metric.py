@@ -14,11 +14,13 @@ def _():
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    # Chapter 3: Norms and Metrics: Measuring Size and Distance
+    # Note 02: Norms and Metrics: Measuring Size and Distance
+
+    &larr; Previous Note: [01 Inner Products](01_inner_product.py) | Next Note: [03 Hyperplanes](03_hyperplanes.py) &rarr;
 
     ---
 
-    ## [a] Why Do You Need to Know This?
+    ## [a] Why do you need to know these concepts?
 
     Machine learning is fundamentally about **minimizing distances** between predictions and targets, **constraining the size** of model parameters, and **measuring separation** between data points. Every one of these operations relies on a norm or a metric:
 
@@ -38,7 +40,7 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ## [b] The Concept, the Math, and Its Role in ML / AI / Stats
+    ## [b] Concept explanation with their role in ML/AI/Stats?
 
     ### Norm: Measuring the "Size" of a Vector
 
@@ -122,14 +124,14 @@ def _(mo):
 @app.cell
 def _():
     import numpy as np
-    import matplotlib.pyplot as plt
+    import plotly.graph_objects as go
 
-    plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
-    return np, plt
+    return go, np
 
 
 @app.cell
-def _(np, plt):
+def _(go, np):
+
     def unit_circle(p, num_points=1000):
         """Compute the unit circle boundary for L_p norm."""
         if p == np.inf:
@@ -141,31 +143,53 @@ def _(np, plt):
         y_neg = -y_pos
         return np.concatenate([x, x[::-1]]), np.concatenate([y_pos, y_neg])
 
-    fig, ax = plt.subplots(figsize=(7, 7), dpi=150)
+    fig = go.Figure()
 
     norms = [
-        (0.5, "#9b59b6", "$p = 0.5$ (quasi-norm)"),
-        (1,   "#e74c3c", "$L_1$: Diamond (Lasso)"),
-        (2,   "#3498db", "$L_2$: Circle (Ridge)"),
-        (4,   "#e67e22", "$L_4$: Rounded square"),
-        (np.inf, "#2ecc71", r"$L_\infty$: Square (Adversarial)"),
+        (0.5, "#9b59b6", "p = 0.5 (quasi-norm)"),
+        (1,   "#e74c3c", "L₁: Diamond (Lasso)"),
+        (2,   "#3498db", "L₂: Circle (Ridge)"),
+        (4,   "#e67e22", "L₄: Rounded square"),
+        (np.inf, "#2ecc71", "L_∞: Square (Adversarial)"),
     ]
 
     for p, color, label in norms:
         x, y = unit_circle(p)
-        ax.plot(x, y, color=color, linewidth=2, label=label)
+        fig.add_trace(go.Scatter(
+            x=x,
+            y=y,
+            mode="lines",
+            name=label,
+            line=dict(color=color, width=2.5)
+        ))
 
-    ax.axhline(0, color="gray", linewidth=0.5)
-    ax.axvline(0, color="gray", linewidth=0.5)
-    ax.set_aspect("equal")
-    ax.set_title("Unit Norm Sets: How Different $p$-Norms Define 'Distance = 1'", fontsize=12, fontweight="bold")
-    ax.set_xlabel("$x_1$", fontsize=11)
-    ax.set_ylabel("$x_2$", fontsize=11)
-    ax.legend(loc="upper right", fontsize=9)
-    ax.grid(True, linestyle="--", alpha=0.4)
-    plt.tight_layout()
+    fig.update_layout(
+        title=dict(
+            text="Unit Norm Sets: How Different p-Norms Define Distance = 1",
+            font=dict(size=14)
+        ),
+        xaxis=dict(
+            title="x₁",
+            range=[-1.6, 1.6],
+            zeroline=True,
+            gridcolor="#e5e5e5",
+            scaleanchor="y",
+            scaleratio=1
+        ),
+        yaxis=dict(
+            title="x₂",
+            range=[-1.6, 1.6],
+            zeroline=True,
+            gridcolor="#e5e5e5"
+        ),
+        template="plotly_white",
+        legend=dict(x=0.68, y=0.98),
+        width=600,
+        height=600
+    )
+
     fig
-    return ax, fig, norms, unit_circle
+    return fig, norms, unit_circle
 
 
 @app.cell(hide_code=True)
@@ -179,7 +203,7 @@ def _(mo):
 
 
 @app.cell
-def _(np, plt):
+def _(go, np):
     rng = np.random.default_rng(47)
     points1 = rng.integers(-3, 4, size=(200, 2))
     points2 = rng.integers(-3, 4, size=(200, 2))
@@ -187,18 +211,50 @@ def _(np, plt):
     d_euclidean = np.sqrt(np.sum((points2 - points1)**2, axis=1))
     d_manhattan = np.sum(np.abs(points2 - points1), axis=1)
 
-    fig2, ax2 = plt.subplots(figsize=(6, 6), dpi=150)
-    ax2.scatter(d_euclidean, d_manhattan, color="#1B7A7A", alpha=0.6, edgecolors="k", s=40, label="Vector pairs")
-    max_val = max(d_manhattan.max(), d_euclidean.max()) + 0.5
-    ax2.plot([0, max_val], [0, max_val], color="#D65A31", linestyle="--", linewidth=2, label=r"$d_{L_2} = d_{L_1}$ (equality line)")
-    ax2.set_xlabel("Euclidean Distance ($L_2$)", fontsize=11)
-    ax2.set_ylabel("Manhattan Distance ($L_1$)", fontsize=11)
-    ax2.set_title(r"Minkowski Inequality: $\|x\|_2 \leq \|x\|_1$ (all points above the line)", fontsize=11, fontweight="bold")
-    ax2.legend(fontsize=9)
-    ax2.grid(True, linestyle="--", alpha=0.4)
-    plt.tight_layout()
+    max_val = float(max(d_manhattan.max(), d_euclidean.max()) + 0.5)
+
+    fig2 = go.Figure()
+    fig2.add_trace(go.Scatter(
+        x=d_euclidean,
+        y=d_manhattan,
+        mode="markers",
+        name="Vector pairs",
+        marker=dict(
+            color="#1B7A7A",
+            size=7,
+            opacity=0.7,
+            line=dict(color="black", width=0.5)
+        )
+    ))
+    fig2.add_trace(go.Scatter(
+        x=[0, max_val],
+        y=[0, max_val],
+        mode="lines",
+        name="d_L₂ = d_L₁ (equality line)",
+        line=dict(color="#D65A31", dash="dash", width=2)
+    ))
+    fig2.update_layout(
+        title=dict(
+            text="Minkowski Inequality: ||x||₂ ≤ ||x||₁ (all points on or above equality line)",
+            font=dict(size=13)
+        ),
+        xaxis=dict(
+            title="Euclidean Distance (L₂)",
+            zeroline=True,
+            gridcolor="#e5e5e5"
+        ),
+        yaxis=dict(
+            title="Manhattan Distance (L₁)",
+            zeroline=True,
+            gridcolor="#e5e5e5"
+        ),
+        template="plotly_white",
+        width=650,
+        height=550
+    )
+
     fig2
-    return ax2, d_euclidean, d_manhattan, fig2, max_val, points1, points2, rng
+    return d_euclidean, d_manhattan, fig2, max_val, points1, points2, rng
 
 
 @app.cell(hide_code=True)
@@ -212,6 +268,10 @@ def _(mo):
     - The $L_p$ norm family ($p = 1, 2, \infty$) controls the **geometry of your model**: $L_1$ encourages sparsity (Lasso), $L_2$ encourages small uniform weights (Ridge), and $L_\infty$ bounds worst-case deviations (adversarial robustness).
     - **Euclidean distance is always ≤ Manhattan distance** (Minkowski inequality), which affects nearest-neighbor search behavior and distance-based clustering.
     - In practice, the **choice of norm is a modeling decision**: it determines how errors are penalized (loss), how parameters are constrained (regularization), and what "nearby" means (retrieval).
+
+    ---
+
+    &larr; Previous Note: [01 Inner Products](01_inner_product.py) | Next Note: [03 Hyperplanes](03_hyperplanes.py) &rarr;
     """)
     return
 

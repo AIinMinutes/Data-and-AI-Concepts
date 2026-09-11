@@ -14,7 +14,9 @@ def _():
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    # Chapter 2: Inner Products: Measuring Similarity in Vector Spaces
+    # Note 01: Inner Products: Measuring Similarity in Vector Spaces
+
+    &larr; Previous Note: [00 Systems of Linear Equations](00_introduction.py) | Next Note: [02 Norms and Metrics](02_norm_and_metric.py) &rarr;
 
     ---
 
@@ -337,6 +339,10 @@ def _(mo):
     - **In Machine Learning**: SVMs depend entirely on pairwise inner products. The **kernel trick** replaces these with kernel functions to learn non-linear decision boundaries without explicit high-dimensional feature construction.
     - **In Deep Learning**: Every attention score in a Transformer is an inner product $\langle \mathbf{q}_i, \mathbf{k}_j \rangle$, making the inner product the computational heartbeat of modern language models.
     - **Practical rule**: If two vectors point in similar directions, their inner product is large and positive. If orthogonal, it is zero. If opposing, it is negative. This geometric intuition drives similarity search, attention, and classification.
+
+    ---
+
+    &larr; Previous Note: [00 Systems of Linear Equations](00_introduction.py) | Next Note: [02 Norms and Metrics](02_norm_and_metric.py) &rarr;
     """)
     return
 

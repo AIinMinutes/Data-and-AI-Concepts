@@ -16,7 +16,9 @@ def _():
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    # Chapter 1: Systems of Linear Equations and Vector Foundations
+    # Note 00: Systems of Linear Equations and Vector Foundations
+
+    Next Note: [01 Inner Products](01_inner_product.py) &rarr;
 
     ---
 
@@ -245,6 +247,10 @@ def _(mo):
     * **Matrix Formulation**: Grouping quantities and observations into matrices turns a set of simultaneous equations into a compact matrix multiplication problem.
     * **Invertibility and Determinants**: A unique solution exists if and only if the matrix determinant is non-zero, indicating that the equations are linearly independent.
     * **Computational Practice**: While matrix inversion ($\mathbf{A}^{-1}$) is theoretically convenient, numerical solvers like `np.linalg.solve` should always be preferred in practice for speed and stability.
+ 
+    ---
+ 
+    Next Note: [01 Inner Products](01_inner_product.py) &rarr;
     """)
     return
 
