@@ -394,6 +394,7 @@ PROCESSED_NOTES: list[str] = [
     "45_shapley.py",
     "46_model_counterfactuals.py",
     "47_gelu.py",
+    "48_temperature_scaled_softmax.py",
 ]
 
 
