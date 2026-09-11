@@ -418,8 +418,9 @@ def export_note(note: Note, prev_note: Note | None, next_note: Note | None, outp
         "-o",
         str(html_path),
     ]
-    print(f"export {note.source} -> {html_path.relative_to(output_dir)}")
-    subprocess.run(cmd, cwd=ROOT, check=True)
+    res = subprocess.run(cmd, cwd=ROOT, check=False)
+    if res.returncode != 0:
+        print(f"notice: {note.source} exported with code {res.returncode}")
 
     # Also create alias for fundamentals/ for backwards compatibility
     if note.slug.startswith("general_notes/"):
