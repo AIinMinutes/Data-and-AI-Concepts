@@ -404,8 +404,18 @@ def get_all_notes() -> list[Note]:
     return notes
 
 
-def export_note(note: Note, prev_note: Note | None, next_note: Note | None, output_dir: Path) -> Path:
+def export_note(
+    note: Note, prev_note: Note | None, next_note: Note | None, output_dir: Path, force: bool = False
+) -> Path:
     html_path = output_dir / note.slug / "index.html"
+    source_file = ROOT / note.source
+
+    # Skip export if HTML exists and source hasn't been modified since
+    if not force and html_path.is_file():
+        if html_path.stat().st_mtime >= source_file.stat().st_mtime:
+            print(f"skip (up to date): {note.source}")
+            return html_path
+
     html_path.parent.mkdir(parents=True, exist_ok=True)
     cmd = [
         "uv",
@@ -414,10 +424,11 @@ def export_note(note: Note, prev_note: Note | None, next_note: Note | None, outp
         "export",
         "html",
         "--force",
-        str(ROOT / note.source),
+        str(source_file),
         "-o",
         str(html_path),
     ]
+    print(f"export {note.source} -> {html_path.relative_to(output_dir)}")
     res = subprocess.run(cmd, cwd=ROOT, check=False)
     if res.returncode != 0:
         print(f"notice: {note.source} exported with code {res.returncode}")
@@ -629,7 +640,7 @@ def render_index(notes: list[Note]) -> str:
 """
 
 
-def build(output_dir: Path, only: str | None) -> None:
+def build(output_dir: Path, only: str | None, force: bool = False) -> None:
     all_notes = get_all_notes()
     selected = [
         note
@@ -654,7 +665,7 @@ def build(output_dir: Path, only: str | None) -> None:
         else:
             prev_note = None
             next_note = None
-        export_note(note, prev_note, next_note, output_dir)
+        export_note(note, prev_note, next_note, output_dir, force=force)
 
     (output_dir / "index.html").write_text(render_index(all_notes), encoding="utf-8")
     print(f"site built -> {output_dir}")
@@ -672,9 +683,14 @@ def main() -> None:
         "--only",
         help="export a single notebook (number, stem, filename, or slug)",
     )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="force export of all notebooks even if unchanged",
+    )
     args = parser.parse_args()
     try:
-        build(args.output.resolve(), args.only)
+        build(args.output.resolve(), args.only, force=args.force)
     except subprocess.CalledProcessError as exc:
         raise SystemExit(exc.returncode) from exc
 

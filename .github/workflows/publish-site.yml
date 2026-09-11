@@ -31,7 +31,15 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Build site
+      - name: Cache built site
+        uses: actions/cache@v4
+        with:
+          path: ./_site
+          key: site-cache-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            site-cache-${{ runner.os }}-
+
+      - name: Build site (incremental)
         run: uv run python scripts/build_site.py
 
       - name: Publish to AIinMinutes.github.io
