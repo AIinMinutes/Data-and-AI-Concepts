@@ -383,6 +383,7 @@ PROCESSED_NOTES: list[str] = [
     "34_mahalanobis_distance.py",
     "35_gini_impurity_vs_entropy.py",
     "36_agglomerative_clustering.py",
+    "37_natural_breaks.py",
 ]
 
 
