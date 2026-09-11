@@ -129,14 +129,18 @@ def _(mo):
     ### 5. Principal Coordinates and the Symmetric Biplot
 
     To project both row and column points into the same orthogonal coordinate space:
+
     - **Principal Row Coordinates ($\mathbf{F}$)**:
-      $$
-      \mathbf{F} = \mathbf{D}_r^{-1/2} \mathbf{U} \boldsymbol{\Gamma}
-      $$
+
+    $$
+    \mathbf{F} = \mathbf{D}_r^{-1/2} \mathbf{U} \boldsymbol{\Gamma}
+    $$
+
     - **Principal Column Coordinates ($\mathbf{G}$)**:
-      $$
-      \mathbf{G} = \mathbf{D}_c^{-1/2} \mathbf{V} \boldsymbol{\Gamma}
-      $$
+
+    $$
+    \mathbf{G} = \mathbf{D}_c^{-1/2} \mathbf{V} \boldsymbol{\Gamma}
+    $$
 
     In the **Symmetric Biplot**, rows and columns are simultaneously plotted along the first two principal axes:
     - Proximity between two row points indicates that they share similar proportional distributions across column categories.

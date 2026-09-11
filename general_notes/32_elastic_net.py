@@ -51,9 +51,9 @@ def _(mo):
     3. **Zou & Hastie's Elastic Net Synthesis (2005)**:
        Elastic Net combines the $L_1$ and $L_2$ penalties into a convex compromise:
 
-       $$
-       \mathcal{L}(\boldsymbol{\beta}) = \frac{1}{2n}\|\mathbf{y} - \mathbf{X}\boldsymbol{\beta}\|_2^2 + \alpha \left[\rho \|\boldsymbol{\beta}\|_1 + \frac{1 - \rho}{2}\|\boldsymbol{\beta}\|_2^2\right]
-       $$
+    $$
+    \mathcal{L}(\boldsymbol{\beta}) = \frac{1}{2n}\|\mathbf{y} - \mathbf{X}\boldsymbol{\beta}\|_2^2 + \alpha \left[\rho \|\boldsymbol{\beta}\|_1 + \frac{1 - \rho}{2}\|\boldsymbol{\beta}\|_2^2\right]
+    $$
 
        where $\rho \in [0, 1]$ is the `l1_ratio`.
     4. **The Grouping Property**: The strict convexity of the $L_2$ penalty ensures that strongly correlated features enter or leave the model together with similar coefficients, overcoming Lasso's arbitrary selection instability while maintaining exact sparsity.

@@ -54,7 +54,7 @@ def _(mo):
 
     For an aggregation like `df["salary"].mean()`:
     - 1 addition per 8-byte float64: $I = \frac{1}{8} = 0.125 \text{ FLOPs/Byte}$.
-    - Modern CPUs achieve $> 1000 \text{ GFLOPs/s}$ of compute, but system DDR memory provides only $\approx 50\text{--}100 \text{ GB/s}$ bandwidth.
+    - Modern CPUs achieve $> 1000 \text{ GFLOPs/s}$ of compute, but system DDR memory provides only $\approx 50 - 100 \text{ GB/s}$ bandwidth.
     - Thus, tabular operations are overwhelmingly **memory-bandwidth bound**.
 
     ### Hardware Bandwidth Disparity
@@ -69,10 +69,10 @@ def _(mo):
 
     | Hardware Tier | Memory Type | Typical Bandwidth | Compute Cores |
     | :--- | :--- | :--- | :--- |
-    | **CPU Host RAM** | Dual-Channel DDR5 | $60\text{--}90 \text{ GB/s}$ | $8\text{--}64$ cores |
-    | **PCIe Interconnect** | PCIe 4.0 / 5.0 x16 | $31.5\text{--}63 \text{ GB/s}$ | Point-to-point bus |
-    | **Workstation GPU** | GDDR6 / GDDR6X | $500\text{--}1000 \text{ GB/s}$ | $5000\text{--}16000$ CUDA cores |
-    | **Data Center GPU** | HBM2e / HBM3 / HBM3e | $2000\text{--}3350 \text{ GB/s}$ | $14000\text{--}18000$ CUDA cores |
+    | **CPU Host RAM** | Dual-Channel DDR5 | $60 - 90 \text{ GB/s}$ | $8 - 64$ cores |
+    | **PCIe Interconnect** | PCIe 4.0 / 5.0 x16 | $31.5 - 63 \text{ GB/s}$ | Point-to-point bus |
+    | **Workstation GPU** | GDDR6 / GDDR6X | $500 - 1000 \text{ GB/s}$ | $5000 - 16000$ CUDA cores |
+    | **Data Center GPU** | HBM2e / HBM3 / HBM3e | $2000 - 3350 \text{ GB/s}$ | $14000 - 18000$ CUDA cores |
 
     Because GPU High-Bandwidth Memory (HBM) delivers **20x to 50x higher memory bandwidth** than CPU DDR memory, memory-bound dataframe aggregations experience massive acceleration when executed on GPUs.
     """)
