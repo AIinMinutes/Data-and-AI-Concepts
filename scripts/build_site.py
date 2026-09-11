@@ -361,6 +361,7 @@ PROCESSED_NOTES: list[str] = [
     "12_multivariate_normal_distribution.py",
     "13_unbiased_vs_consistent.py",
     "14_dist_of_minimum.py",
+    "15_mutual_information.py",
 ]
 
 
