@@ -1,358 +1,256 @@
 import marimo
 
 __generated_with = "0.24.0"
-app = marimo.App()
+app = marimo.App(width="medium")
 
 
 @app.cell
 def _():
     import marimo as mo
+    import numpy as np
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
 
-    return (mo,)
+    return go, make_subplots, mo, np
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    # Matrix with $m$ Rows and $n$ Columns
-    A matrix $A$ with $m$ rows and $n$ columns is denoted as $A_{m \times n}$, where:
+    # Note 04: Rank-One Matrices, Outer Products, and Low-Rank Decomposition
 
-    $$
-    A =
-    \begin{bmatrix}
-    a_{11} & a_{12} & \cdots & a_{1n} \\
-    a_{21} & a_{22} & \cdots & a_{2n} \\
-    \vdots & \vdots & \ddots & \vdots \\
-    a_{m1} & a_{m2} & \cdots & a_{mn}
-    \end{bmatrix}
-    $$
+    &larr; Previous Note: [03 Hyperplanes](03_hyperplanes.py) | Next Note: [05 Orthogonality](05_orthogonality.py) &rarr;
 
     ---
 
-    # Rank of a Matrix
-    - **Definition**: The rank of a matrix is the number of linearly independent rows or columns in the matrix.
-    - **Notation**: $\text{rank}(A)$
-    - **Properties**:
-      - $\text{rank}(A) \leq \min(m, n)$
-      - Row rank = Column rank (Rank-Nullity Theorem)
+    ## [a] Why do you need to know these concepts?
+
+    Rank-one matrices are the fundamental atomic building blocks of all linear algebra. Any complex linear transformation, dataset, or neural network weight tensor can be expressed as a linear combination of rank-one matrices.
+
+    Understanding rank-one structures gives you foundational insight into:
+
+    1. **Matrix Factorization**: Decomposing large, unwieldy data matrices into compact products of vectors.
+    2. **Low-Rank Approximation**: Applying the Eckart-Young-Mirsky theorem to compress data, filter noise, and capture dominant latent patterns.
+    3. **Parameter-Efficient Fine-Tuning (PEFT)**: Modern LLM adaptation techniques like LoRA (Low-Rank Adaptation) freeze billions of pre-trained parameters and train rank-one and low-rank factor updates.
+    4. **Recommender Systems**: Factorizing sparse user-item rating grids into shared latent representation spaces.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ---
+
+    ## [b] Concept explanation with their role in ML/AI/Stats?
+
+    ### Definition of a Rank-One Matrix
+
+    A non-zero matrix $\mathbf{A} \in \mathbb{R}^{m \times n}$ has rank 1 if and only if it can be written as the **outer product** of two non-zero vectors $\mathbf{u} \in \mathbb{R}^m$ and $\mathbf{v} \in \mathbb{R}^n$:
+
+    $$
+    \mathbf{A} = \mathbf{u} \mathbf{v}^T = \begin{bmatrix} u_1 \\ u_2 \\ \vdots \\ u_m \end{bmatrix} \begin{bmatrix} v_1 & v_2 & \dots & v_n \end{bmatrix} = \begin{bmatrix} u_1 v_1 & u_1 v_2 & \dots & u_1 v_n \\ u_2 v_1 & u_2 v_2 & \dots & u_2 v_n \\ \vdots & \vdots & \ddots & \vdots \\ u_m v_1 & u_m v_2 & \dots & u_m v_n \end{bmatrix}
+    $$
+
+    Key structural properties of $\mathbf{u}\mathbf{v}^T$:
+    * **Collinear Rows**: Every row of $\mathbf{A}$ is a scalar multiple of $\mathbf{v}^T$: $\text{Row}_i = u_i \mathbf{v}^T$.
+    * **Collinear Columns**: Every column of $\mathbf{A}$ is a scalar multiple of $\mathbf{u}$: $\text{Col}_j = v_j \mathbf{u}$.
+    * **Dimensionality**: The column space $\mathcal{C}(\mathbf{A}) = \text{span}(\mathbf{u})$ has dimension 1. By the Rank-Nullity Theorem, the null space has dimension $n - 1$.
+    * **Eigenvalues and Trace**: The matrix $\mathbf{u}\mathbf{v}^T$ has at most one non-zero eigenvalue, which equals the inner product of the vectors: $\lambda = \mathbf{v}^T \mathbf{u} = \text{tr}(\mathbf{u}\mathbf{v}^T)$.
+
+    ### Outer Product vs Inner Product
+
+    For two vectors $\mathbf{u}, \mathbf{v} \in \mathbb{R}^n$:
+    * **Inner Product (Scalar)**: $\mathbf{u}^T \mathbf{v} = \sum_{i=1}^n u_i v_i \in \mathbb{R}$ measures alignment, projection, and angle.
+    * **Outer Product (Matrix)**: $\mathbf{u} \mathbf{v}^T \in \mathbb{R}^{n \times n}$ generates a rank-one directional mapping.
+
+    ### Singular Value Decomposition as an Additive Sum of Rank-1 Matrices
+
+    The Singular Value Decomposition (SVD) states that any real matrix $\mathbf{A} \in \mathbb{R}^{m \times n}$ of rank $r \le \min(m, n)$ can be factored into orthogonal matrices $\mathbf{U}$, $\mathbf{V}$ and diagonal matrix $\mathbf{\Sigma}$:
+
+    $$
+    \mathbf{A} = \mathbf{U} \mathbf{\Sigma} \mathbf{V}^T = \sum_{i=1}^r \sigma_i \mathbf{u}_i \mathbf{v}_i^T
+    $$
+
+    where:
+    * $\sigma_1 \ge \sigma_2 \ge \dots \ge \sigma_r > 0$ are the singular values.
+    * $\mathbf{u}_i \in \mathbb{R}^m$ are the orthonormal left singular vectors (columns of $\mathbf{U}$).
+    * $\mathbf{v}_i \in \mathbb{R}^n$ are the orthonormal right singular vectors (columns of $\mathbf{V}$).
+    * Each term $\sigma_i \mathbf{u}_i \mathbf{v}_i^T$ is an independent rank-one matrix weighted by $\sigma_i$.
+
+    ### Eckart-Young-Mirsky Theorem
+
+    The optimal rank-$k$ approximation ($k < r$) of $\mathbf{A}$ under both the Frobenius norm and spectral norm is obtained by retaining the top $k$ rank-one components:
+
+    $$
+    \mathbf{A}_k = \sum_{i=1}^k \sigma_i \mathbf{u}_i \mathbf{v}_i^T
+    $$
+
+    The approximation error is directly governed by the neglected singular values:
+
+    $$
+    \|\mathbf{A} - \mathbf{A}_k\|_F = \sqrt{\sum_{i=k+1}^r \sigma_i^2}
+    $$
+
+    ### Role in ML, AI, and Statistics
+
+    **Low-Rank Adaptation (LoRA)**: In large language models, fine-tuning dense weight matrices $\mathbf{W}_0 \in \mathbb{R}^{d \times k}$ directly is computationally prohibitive. LoRA reparameterizes the update as $\Delta \mathbf{W} = \mathbf{B}\mathbf{A}$, where $\mathbf{B} \in \mathbb{R}^{d \times r}$ and $\mathbf{A} \in \mathbb{R}^{r \times k}$ with rank $r \ll \min(d, k)$. A rank-1 or rank-4 update adjusts weights with a tiny fraction of the memory footprint.
+
+    **Principal Component Analysis (PCA)**: PCA finds the dominant rank-one projections of a centered empirical covariance matrix $\mathbf{S} = \frac{1}{n} \mathbf{X}^T \mathbf{X}$. The first principal component corresponds to the highest-energy rank-one approximation $\sigma_1 \mathbf{u}_1 \mathbf{v}_1^T$.
+
+    **Recommender Systems and Matrix Completion**: Large interaction matrices (users $\times$ items) are extremely sparse. Assuming preferences depend on a small number of latent factors models the interaction matrix as a sum of low-rank outer products, enabling prediction of unobserved ratings.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ---
+
+    ## [c] Code examples
+
+    Below are two concrete implementations:
+    1. **Rank-1 Outer Product & SVD Decomposition**: Constructing an outer product from scratch, inspecting properties, and verifying exact additive SVD reconstruction on a $3 \times 2$ matrix.
+    2. **Low-Rank Image / Surface Reconstruction**: Synthesizing a 2D surface pattern and interactively visualizing its progressive rank-$k$ approximations via Plotly.
+    """)
+    return
+
+
+@app.cell
+def _(np):
+    # Example 1: Numerical Mechanics of Rank-1 Matrices and Additive SVD Reconstruction
+    # Define two arbitrary vectors for an outer product
+    u_vec = np.array([2.0, -1.0, 3.0])  # 3 x 1
+    v_vec = np.array([1.0, 4.0])        # 2 x 1
+
+    # Outer product matrix A_rank1 = u @ v.T (shape: 3 x 2)
+    A_rank1 = np.outer(u_vec, v_vec)
+    rank_calculated = np.linalg.matrix_rank(A_rank1)
+
+    # Singular Value Decomposition of a 3 x 2 matrix
+    A_test = np.array([
+        [1.0, 2.0],
+        [3.0, 4.0],
+        [5.0, 6.0]
+    ])
+
+    U, S, Vt = np.linalg.svd(A_test, full_matrices=False)
+
+    # Construct individual rank-1 components: sigma_i * (u_i @ v_i.T)
+    rank1_comp_1 = S[0] * np.outer(U[:, 0], Vt[0, :])
+    rank1_comp_2 = S[1] * np.outer(U[:, 1], Vt[1, :])
+
+    # Reconstruct original matrix by adding the rank-1 components
+    A_reconstructed = rank1_comp_1 + rank1_comp_2
+    reconstruction_error = float(np.linalg.norm(A_test - A_reconstructed, ord="fro"))
+
+    {
+        "rank_of_outer_product": int(rank_calculated),
+        "singular_values": S.tolist(),
+        "first_singular_value": float(S[0]),
+        "second_singular_value": float(S[1]),
+        "reconstruction_frobenius_error": reconstruction_error
+    }
+    return (
+        A_rank1,
+        A_reconstructed,
+        A_test,
+        S,
+        U,
+        Vt,
+        rank1_comp_1,
+        rank1_comp_2,
+        reconstruction_error,
+    )
+
+
+@app.cell
+def _(go, make_subplots, np):
+    # Example 2: Interactive Low-Rank Surface Approximation with Plotly
+    # Generate a synthetic 2D pattern (linear combinations of distinct spatial frequencies)
+    x_axis = np.linspace(-3, 3, 40)
+    y_axis = np.linspace(-3, 3, 40)
+    X_grid, Y_grid = np.meshgrid(x_axis, y_axis)
+
+    # Continuous 2D surface with distinct low-rank components
+    pattern = (
+        1.5 * np.outer(np.exp(-y_axis**2 / 2), np.exp(-x_axis**2 / 2))
+        + 1.0 * np.outer(np.sin(1.5 * y_axis), np.cos(1.5 * x_axis))
+        + 0.5 * np.outer(y_axis / 3, (x_axis / 3)**2)
+    )
+
+    # Perform full SVD
+    U_p, S_p, Vt_p = np.linalg.svd(pattern, full_matrices=False)
+
+    # Compute Rank-1, Rank-2, and Rank-3 approximations
+    approx_rank_1 = S_p[0] * np.outer(U_p[:, 0], Vt_p[0, :])
+    approx_rank_2 = approx_rank_1 + S_p[1] * np.outer(U_p[:, 1], Vt_p[1, :])
+    approx_rank_3 = approx_rank_2 + S_p[2] * np.outer(U_p[:, 2], Vt_p[2, :])
+
+    total_energy = np.sum(S_p**2)
+    energy_r1 = 100.0 * (S_p[0]**2) / total_energy
+    energy_r2 = 100.0 * (S_p[0]**2 + S_p[1]**2) / total_energy
+    energy_r3 = 100.0 * np.sum(S_p[:3]**2) / total_energy
+
+    # Render side-by-side comparison heatmaps
+    fig = make_subplots(
+        rows=1,
+        cols=4,
+        subplot_titles=[
+            f"Rank 1 ({energy_r1:.1f}% energy)",
+            f"Rank 2 ({energy_r2:.1f}% energy)",
+            f"Rank 3 ({energy_r3:.1f}% energy)",
+            "Original (Rank 40)"
+        ],
+        horizontal_spacing=0.04
+    )
+
+    fig.add_trace(go.Heatmap(z=approx_rank_1, colorscale="Tealgrn", showscale=False), row=1, col=1)
+    fig.add_trace(go.Heatmap(z=approx_rank_2, colorscale="Tealgrn", showscale=False), row=1, col=2)
+    fig.add_trace(go.Heatmap(z=approx_rank_3, colorscale="Tealgrn", showscale=False), row=1, col=3)
+    fig.add_trace(go.Heatmap(z=pattern, colorscale="Tealgrn", showscale=False), row=1, col=4)
+
+    fig.update_layout(
+        title=dict(
+            text="Low-Rank Matrix Approximations: Progressive Sum of Rank-1 Outer Products",
+            font=dict(size=14)
+        ),
+        template="plotly_white",
+        width=920,
+        height=320,
+        margin=dict(l=20, r=20, t=50, b=20)
+    )
+
+    for i in range(1, 5):
+        fig.update_xaxes(showticklabels=False, row=1, col=i)
+        fig.update_yaxes(showticklabels=False, row=1, col=i)
+
+    fig
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ---
+
+    ## [d] Takeaway
+
+    * **Atomic Linear Units**: Every rank-one matrix is formed by an outer product $\mathbf{u}\mathbf{v}^T$, constraining all rows to lie along $\mathbf{v}^T$ and all columns to lie along $\mathbf{u}$.
+    * **Additive SVD Representation**: Any matrix $\mathbf{A}$ of rank $r$ is an exact linear superposition of $r$ orthogonal rank-one components: $\mathbf{A} = \sum_{i=1}^r \sigma_i \mathbf{u}_i \mathbf{v}_i^T$.
+    * **Optimal Compression**: Truncating the SVD to the top $k$ rank-one components produces the best rank-$k$ approximation under the Frobenius and spectral norms.
+    * **Modern AI Applications**: Low-rank structures enable efficient large language model fine-tuning (LoRA), where rank-1 and low-rank factor updates adapt billions of frozen model weights.
 
     ---
 
-    # Rank-1 Matrices
-    A rank-1 matrix can be expressed as the outer product of two vectors:
-
-    $$
-    A = uv^T
-    $$
-
-    Where:
-    - $u$ is an $m \times 1$ column vector,
-    - $v$ is an $n \times 1$ column vector.
-
-    #### Example:
-    For $A = \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix}$, it can be expressed as:
-
-    $$
-    A = \begin{bmatrix} 1 \\ 2 \end{bmatrix} \begin{bmatrix} 1 & 2 \end{bmatrix}
-    $$
-
-    This is a rank-1 matrix since the rows and columns of $A$ are linearly dependent, confirming that $\text{rank}(A) = 1$.
-
-    ---
-
-    # Singular Value Decomposition (SVD)
-    The full SVD decomposes a matrix $A$ of size $m \times n$ into three matrices:
-
-    $$
-    A = U \Sigma V^T
-    $$
-
-    Where:
-    - $U$ is an $m \times m$ orthogonal matrix (left singular vectors),
-    - $\Sigma$ is an $m \times n$ diagonal matrix with singular values $\sigma_1, \sigma_2, \dots, \sigma_r$ on the diagonal (where $r$ is the rank of $A$),
-    - $V^T$ is an $n \times n$ orthogonal matrix (right singular vectors).
-
-    ---
-
-    # Rank-1 Matrix Representation in Full SVD
-    The full SVD expresses $A$ as the sum of rank-1 matrices:
-
-    $$
-    A = \sum_{i=1}^{\min(m, n)} \sigma_i u_i v_i^T
-    $$
-
-    Where:
-    - $\sigma_i$ are the singular values,
-    - $u_i$ are the left singular vectors (columns of $U$),
-    - $v_i$ are the right singular vectors (rows of $V$).
-
-    ---
-
-    # Truncated SVD
-    The truncated SVD approximates the matrix by considering only the largest $k$ singular values:
-
-    $$
-    A_k = \sum_{i=1}^{k} \sigma_i u_i v_i^T
-    $$
-
-    This represents an approximation of $A$ using the first $k$ rank-1 matrices, where $k$ is chosen based on how much of the matrix's information needs to be preserved.
-
-    ---
-
-    # Why SVD Can Be Thought of as a Linear Combination of Rank-1 Matrices
-    The full SVD decomposes $A$ into a sum of rank-1 matrices weighted by the singular values $\sigma_i$. These rank-1 matrices represent the directions in the row and column space of $A$, scaled by the singular values. The rank of $A$ is the number of non-zero singular values, and these non-zero terms correspond to the linearly independent components of $A$.
-
-    ---
-
-    # Example with a $3 \times 2$ Matrix
-    Let the matrix $A$ be a $3 \times 2$ matrix:
-
-    $$
-    A = \begin{bmatrix}
-    1 & 2 \\
-    3 & 4 \\
-    5 & 6
-    \end{bmatrix}
-    $$
-
-    We can compute the SVD of $A$ using Python's numpy library:
-
-    ```python
-    import numpy as np
-
-    A = np.array([1, 2, 3, 4, 5, 6]).reshape(3, 2)
-
-    U, S, V_transposed = np.linalg.svd(A)
-
-    # Reconstruct the matrix as the sum of rank-1 matrices
-    rank_1_matrix_sigma_1 = S[0] * U[:, 0].reshape(3, 1) @ V_transposed[:, 0].reshape(1, 2)
-    rank_1_matrix_sigma_2 = S[1] * U[:, 1].reshape(3, 1) @ V_transposed[:, 1].reshape(1, 2)
-
-    # Sum the rank-1 matrices to get the original matrix
-    rank_1_matrix_sigma_1 + rank_1_matrix_sigma_2
-
-    ```
-
-    # Singular Values $\sigma$
-    The singular values for the matrix $A$ are:
-
-    $$
-    \sigma = [9.52551809, 0.51430058]
-    $$
-
-    ---
-
-    # Left Singular Vectors $U$
-    The left singular vectors (columns of $U$) are:
-
-    $$
-    U = \begin{bmatrix}
-    -0.2298477 & 0.88346102 & 0.40824829 \\
-    -0.52474482 & 0.24078249 & -0.81649658 \\
-    -0.81964194 & -0.40189603 & 0.40824829
-    \end{bmatrix}
-    $$
-
-    ---
-
-    # Right Singular Vectors $V^T$
-    The right singular vectors (rows of $V^T$) are:
-
-    $$
-    V^T = \begin{bmatrix}
-    -0.61962948 & -0.78489445 \\
-    -0.78489445 & 0.61962948
-    \end{bmatrix}
-    $$
-
-    ---
-
-    # Rank-1 Matrices
-
-    ## For $\sigma_1$:
-    $$
-    \text{rank\_1\_matrix\_sigma\_1} = 9.52551809 \cdot \begin{bmatrix} -0.2298477 \\ -0.52474482 \\ -0.81964194 \end{bmatrix} \cdot \begin{bmatrix} -0.61962948 & -0.78489445 \end{bmatrix}
-    $$
-
-    This results in:
-
-    $$
-    \text{rank\_1\_matrix\_sigma\_1} = \sigma_1 u_1 v_1^T = \begin{bmatrix}
-    1.35662819 & 1.71846235 \\
-    3.09719707 & 3.92326845 \\
-    4.83776596 & 6.12807454
-    \end{bmatrix}
-    $$
-
-    ---
-
-    ## For $\sigma_2$:
-    $$
-    \text{rank\_1\_matrix\_sigma\_2} = 0.51430058 \cdot \begin{bmatrix} 0.88346102 \\ 0.24078249 \\ -0.40189603 \end{bmatrix} \cdot \begin{bmatrix} -0.78489445 & 0.61962948 \end{bmatrix}
-    $$
-
-    This results in:
-
-    $$
-    \text{rank\_1\_matrix\_sigma\_2} = \sigma_2 u_2 v_2^T =  \begin{bmatrix}
-    -0.35662819 & 0.28153765 \\
-    -0.09719707 & 0.07673155 \\
-    0.16223404 & -0.12807454
-    \end{bmatrix}
-    $$
-
-    ---
-
-    # Final Matrix Reconstruction
-    By summing the rank-1 matrices, we recover the original matrix $A$:
-
-    $$
-    A = \text{rank\_1\_matrix\_sigma\_1} + \text{rank\_1\_matrix\_sigma\_2}
-    $$
-
-    Thus, the original matrix is exactly reconstructed as:
-
-    $$
-    A = \begin{bmatrix}
-    1 & 2 \\
-    3 & 4 \\
-    5 & 6
-    \end{bmatrix}
-    $$
+    &larr; Previous Note: [03 Hyperplanes](03_hyperplanes.py) | Next Note: [05 Orthogonality](05_orthogonality.py) &rarr;
     """)
     return
 
 
 @app.cell
 def _():
-    import matplotlib.pyplot as plt
-    import numpy as np
-    from PIL import Image
-
-    return Image, np, plt
-
-
-@app.cell
-def _(Image):
-    image = Image.open("sky.jpeg")
-    image
-    return (image,)
-
-
-@app.cell
-def _(image, np):
-    grayscale_image = np.array(image.convert("L"))
-    return (grayscale_image,)
-
-
-@app.cell
-def _(grayscale_image, plt):
-    plt.figure(figsize=(3, 2), dpi=300)
-    plt.imshow(grayscale_image, cmap="gray")
-    plt.axis(False)
-    plt.title("Name: Sky \nAbout: She will come when you need her", fontsize=5)
-    plt.subplots_adjust(bottom=0.2)
-    plt.show()
-    return
-
-
-@app.cell
-def _(grayscale_image, np):
-    U, S, V_transposed = np.linalg.svd(grayscale_image, full_matrices=False)
-    return S, U, V_transposed
-
-
-@app.cell
-def _(S, U, V_transposed):
-    U.shape, S.shape, V_transposed.shape
-    return
-
-
-@app.cell
-def _(S):
-    S[:3]
-    return
-
-
-@app.cell
-def _(S):
-    S[-3:]
-    return
-
-
-@app.cell
-def _(grayscale_image, np, plt):
-    def reconstruct_image(U, S, VT, rank):
-        S_k = np.zeros((U.shape[1], VT.shape[0]))
-        np.fill_diagonal(S_k, S[:rank])
-        # Reconstruct the image for a given rank
-        return np.dot(U[:, :rank], np.dot(S_k[:rank, :rank], VT[:rank, :]))
-
-    def frobenius_norm(original, reconstructed):
-        return np.linalg.norm(original - reconstructed, "fro")
-
-    # Compute the Frobenius norm
-    def rank_1_matrix(U, S, VT, i):
-        return S[i] * np.outer(U[:, i], VT[i, :])
-
-    ranks = [1, 10, 50, 100, 200, 300, 400, grayscale_image.shape[0]]
-    # Get rank-1 matrix
-    U_1, S_1, VT = np.linalg.svd(grayscale_image, full_matrices=False)
-    plt.figure(figsize=(15, 15), dpi=300)
-    plt.subplot(3, 3, 1)
-    # Ranks to visualize
-    plt.imshow(grayscale_image, cmap="gray")
-    plt.axis("off")
-    # Perform SVD
-    plt.title("Original Image", fontsize=15)
-    for i, rank in enumerate(ranks):
-        # Plot low-rank approximations
-        low_rank_image = reconstruct_image(U_1, S_1, VT, rank)
-        frobenius_error = frobenius_norm(grayscale_image, low_rank_image)
-        plt.subplot(3, 3, i + 2)
-        plt.imshow(low_rank_image, cmap="gray")
-        plt.axis("off")
-        if i != len(ranks) - 1:
-            plt.title(f"Rank: {rank}, Frobenius Norm: {frobenius_error:.2f}", fontsize=15)
-        else:
-            plt.title(f"Full Rank, Frobenius Norm: {frobenius_error:.2f}", fontsize=15)
-    plt.suptitle("SVD as the weighted sum of Rank One matrices.", fontsize=25)
-    plt.subplots_adjust(top=0.93)
-    plt.savefig("frobenius_norm_images.jpg", dpi=300)
-    plt.show()
-    plt.figure(figsize=(15, 15), dpi=300)
-    for i in range(9):
-        rank_1_image = rank_1_matrix(U_1, S_1, VT, i)
-        plt.subplot(3, 3, i + 1)
-        plt.imshow(rank_1_image, cmap="gray")
-        plt.axis("off")
-        plt.title(f"Rank One Matrix @ Singular Value {i + 1}", fontsize=15)
-    plt.suptitle("Rank One Matrices @ Singular Values", fontsize=25)
-    plt.subplots_adjust(top=0.93)
-    # Plot rank-1 matrices
-    plt.savefig("rank_one_matrices.jpg", dpi=300)
-    plt.show()
-    return
-
-
-@app.cell
-def _(np):
-    # Example
-    A = np.array([1, 2, 3, 4, 5, 6]).reshape(3, 2)
-    print(A)
-    U_2, S_2, V_transposed_1 = np.linalg.svd(A)
-    rank_1_matrix_sigma_1 = S_2[0] * U_2[:, 0].reshape(3, 1) @ V_transposed_1[:, 0].reshape(1, 2)
-    rank_1_matrix_sigma_2 = S_2[1] * U_2[:, 1].reshape(3, 1) @ V_transposed_1[:, 1].reshape(1, 2)
-    A_SVD = rank_1_matrix_sigma_1 + rank_1_matrix_sigma_2
-    assert np.allclose(A, A_SVD)
-    return rank_1_matrix_sigma_1, rank_1_matrix_sigma_2
-
-
-@app.cell
-def _(rank_1_matrix_sigma_1, rank_1_matrix_sigma_2):
-    print(rank_1_matrix_sigma_1)
-    print("\n")
-    print(rank_1_matrix_sigma_2)
     return
 
 
