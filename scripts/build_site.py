@@ -372,6 +372,7 @@ PROCESSED_NOTES: list[str] = [
     "23_ewa_and_bias_correction.py",
     "24_adjusted_r_squared.py",
     "25_predictive_r2.py",
+    "26_hotelling.py",
 ]
 
 
