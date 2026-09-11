@@ -407,6 +407,7 @@ PROCESSED_NOTES: list[str] = [
     "58_pca_for_anomaly_detection.py",
     "59_vae_on_mnist.py",
     "60_vae_anomaly_detection.py",
+    "61_user_item_interaction_matrix.py",
 ]
 
 
