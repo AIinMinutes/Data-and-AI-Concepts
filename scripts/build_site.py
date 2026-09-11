@@ -373,6 +373,7 @@ PROCESSED_NOTES: list[str] = [
     "24_adjusted_r_squared.py",
     "25_predictive_r2.py",
     "26_hotelling.py",
+    "27_principal_component_analysis.py",
 ]
 
 
