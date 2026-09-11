@@ -62,10 +62,12 @@ def _(mo):
         Let $x \in \mathbb{R}^D$ represent an input observation. An autoencoder is parameterized by two continuous transformations:
 
         1. **Encoder Network** $g_\phi$:
-           $$z = g_\phi(x) = \sigma(W_e^{(L)} \dots \sigma(W_e^{(1)} x + b_e^{(1)}) \dots + b_e^{(L)}) \in \mathbb{R}^d$$
+
+        $$z = g_\phi(x) = \sigma(W_e^{(L)} \dots \sigma(W_e^{(1)} x + b_e^{(1)}) \dots + b_e^{(L)}) \in \mathbb{R}^d$$
 
         2. **Decoder Network** $f_\theta$:
-           $$\hat{x} = f_\theta(z) = \sigma(W_d^{(M)} \dots \sigma(W_d^{(1)} z + b_d^{(1)}) \dots + b_d^{(M)}) \in \mathbb{R}^D$$
+
+        $$\hat{x} = f_\theta(z) = \sigma(W_d^{(M)} \dots \sigma(W_d^{(1)} z + b_d^{(1)}) \dots + b_d^{(M)}) \in \mathbb{R}^D$$
 
         where $d \ll D$ is the latent bottleneck dimension. The joint parameters $(\phi, \theta)$ are optimized by minimizing the empirical reconstruction risk:
 
@@ -85,7 +87,9 @@ def _(mo):
         If $W_e \in \mathbb{R}^{d \times D}$ and $W_d \in \mathbb{R}^{D \times d}$ are trained to convergence on centered data with sample covariance $\Sigma = \frac{1}{N} X^\top X$:
         1. The product matrix $P = W_d W_e \in \mathbb{R}^{D \times D}$ is an orthogonal projection operator onto the $d$-dimensional subspace spanned by the top $d$ eigenvectors of $\Sigma$.
         2. The minimum reconstruction loss of the linear autoencoder is strictly identical to Truncated Singular Value Decomposition (PCA):
-           $$\min_{W_d, W_e} \| X - X W_e^\top W_d^\top \|_F^2 = \sum_{j=d+1}^D \lambda_j(\Sigma)$$
+
+        $$\min_{W_d, W_e} \| X - X W_e^\top W_d^\top \|_F^2 = \sum_{j=d+1}^D \lambda_j(\Sigma)$$
+
         where $\lambda_j$ are the eigenvalues of $\Sigma$ in descending order.
 
         When non-linear activation functions (ReLU, GELU, Sigmoid) and multiple hidden layers are introduced, the autoencoder transcends hyperplanes, learning non-linear manifolds that wrap through ambient space.

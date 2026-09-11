@@ -8,7 +8,7 @@ on:
       - "general_notes/**"
       - "subject_notes/**"
       - "research_paper_notes/**"
-      - "random/**"
+      - "random_notes/**"
       - "scripts/**"
       - "pyproject.toml"
       - "uv.lock"

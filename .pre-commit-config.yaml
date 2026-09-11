@@ -13,6 +13,6 @@ repos:
     hooks:
       - id: ruff
         args: [--fix]
-        exclude: ^(general_notes/|random/|subject_notes/|research_paper_notes/)
+        exclude: ^(general_notes/|random_notes/|subject_notes/|research_paper_notes/)
       - id: ruff-format
-        exclude: ^(general_notes/|random/|subject_notes/|research_paper_notes/)
+        exclude: ^(general_notes/|random_notes/|subject_notes/|research_paper_notes/)

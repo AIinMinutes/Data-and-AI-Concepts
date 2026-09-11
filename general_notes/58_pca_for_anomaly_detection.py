@@ -77,9 +77,12 @@ def _(mo):
         1. **Latent Code**: $z = x V_k \in \mathbb{R}^k$
         2. **Orthogonal Projection onto $\mathcal{S}_k$**: $P_k = V_k V_k^\top \in \mathbb{R}^{p \times p}$
         3. **Reconstructed Observation**:
-           $$\hat{x} = z V_k^\top = x V_k V_k^\top = x P_k \in \mathbb{R}^p$$
+
+        $$\hat{x} = z V_k^\top = x V_k V_k^\top = x P_k \in \mathbb{R}^p$$
+
         4. **Residual Error Vector**:
-           $$e = x - \hat{x} = x (I - P_k) = x V_\perp V_\perp^\top \in \mathcal{S}_k^\perp$$
+
+        $$e = x - \hat{x} = x (I - P_k) = x V_\perp V_\perp^\top \in \mathcal{S}_k^\perp$$
 
         If an observation conforms to the nominal correlation structure, its energy is almost entirely contained within $\mathcal{S}_k$, yielding $\|e\|_2 \approx 0$. If an observation violates the correlation structure (e.g., an abnormal sensor reading uncoupled from its correlated neighbors), it projects heavily into $\mathcal{S}_k^\perp$, triggering a large residual $\|e\|_2$.
 

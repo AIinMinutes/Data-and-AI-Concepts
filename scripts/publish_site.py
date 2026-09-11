@@ -45,7 +45,7 @@ def copy_site(site: Path, dest: Path) -> None:
     shutil.copy2(site / "index.html", dest / "index.html")
     shutil.copy2(site / "CNAME", dest / "CNAME")
     (dest / ".nojekyll").write_text("")
-    for folder in ["general_notes", "fundamentals", "random", "subject_notes", "research_paper_notes"]:
+    for folder in ["general_notes", "fundamentals", "random", "random_notes", "subject_notes", "research_paper_notes"]:
         src = site / folder
         dst = dest / folder
         if src.exists():

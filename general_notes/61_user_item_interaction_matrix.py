@@ -19,7 +19,7 @@ def _(mo):
     return mo.md(r"""
     # User-Item Interaction Matrix
 
-    [← 60 VAE Anomaly Detection](60_vae_anomaly_detection.py) | [Index](../index.html) | [62 Grammar of Graphics →](62_grammar_of_graphics.py)
+    [← 60 VAE Anomaly Detection](60_vae_anomaly_detection.py) | [Index](../index.html) | [62 Grammar of Graphics →](../random_notes/62_grammar_of_graphics.py)
 
     The **user-item interaction matrix** is the foundational structure underlying collaborative filtering, recommender systems, and bipartite graph analytics. In real-world platforms (e-commerce, streaming services, social networks), users interact with subsets of a large catalog of items. These interactions can be **explicit** (numerical ratings, upvotes) or **implicit** (page views, clicks, purchases, dwell time).
 

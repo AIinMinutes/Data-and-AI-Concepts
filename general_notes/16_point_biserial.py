@@ -262,7 +262,8 @@ def _(mo):
     2. The Pearson correlation $r_{XY}$ using `scipy.stats.pearsonr`.
     3. The independent two-sample Student's t-test statistic using `scipy.stats.ttest_ind`.
     4. The transformed t-statistic derived analytically from correlation:
-       $$t = \frac{r_{pb} \sqrt{n - 2}}{\sqrt{1 - r_{pb}^2}}$$
+
+    $$t = \frac{r_{pb} \sqrt{n - 2}}{\sqrt{1 - r_{pb}^2}}$$
 
     We verify that all three formulations yield identical test statistics down to machine floating-point precision ($< 10^{-14}$).
     """)

@@ -61,7 +61,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 # Marimo notebooks use reactive cell scoping, top-level imports in cells, and visual outputs
 "general_notes/*.py" = ["E402", "F401", "F841"]
-"random/*.py" = ["E402", "F401", "F841"]
+"random_notes/*.py" = ["E402", "F401", "F841"]
 "subject_notes/**/*.py" = ["E402", "F401", "F841"]
 "research_paper_notes/**/*.py" = ["E402", "F401", "F841"]
 

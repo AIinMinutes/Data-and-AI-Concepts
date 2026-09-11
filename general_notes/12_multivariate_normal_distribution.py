@@ -365,7 +365,9 @@ def _(mo):
     In this example, we generate $N = 1,000$ points from a correlated bivariate normal distribution $\mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma})$. We:
     1. Estimate $\hat{\boldsymbol{\mu}}_{\text{MLE}}$ and unbiased sample covariance $\mathbf{S}$.
     2. Apply the Mahalanobis whitening transformation:
-       $$\mathbf{Z} = \boldsymbol{\Sigma}^{-1/2} (\mathbf{X} - \boldsymbol{\mu})$$
+
+    $$\mathbf{Z} = \boldsymbol{\Sigma}^{-1/2} (\mathbf{X} - \boldsymbol{\mu})$$
+
     3. Verify that the transformed covariance matrix equals the identity matrix $\mathbf{I}_2$.
     """)
     return

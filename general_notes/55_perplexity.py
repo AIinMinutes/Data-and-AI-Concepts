@@ -70,14 +70,18 @@ def _(mo):
         To build rigorous intuition for perplexity, consider two boundary cases on a vocabulary $\mathcal{V}$ of size $V$:
 
         1. **Perfect Model (Zero Uncertainty)**:
-           If the model predicts the correct token with $100\%$ confidence at every step ($P_\theta(w_i \mid w_{<i}) = 1.0$ for all $i$):
-           $$\mathcal{H}(W) = 0 \implies \operatorname{PPL}(W) = \exp(0) = 1.0$$
-           A perplexity of $1.0$ is the theoretical minimum, signifying zero surprise.
+        If the model predicts the correct token with $100\%$ confidence at every step ($P_\theta(w_i \mid w_{<i}) = 1.0$ for all $i$):
+
+        $$\mathcal{H}(W) = 0 \implies \operatorname{PPL}(W) = \exp(0) = 1.0$$
+
+        A perplexity of $1.0$ is the theoretical minimum, signifying zero surprise.
 
         2. **Uniform Random Baseline (Maximum Entropy)**:
-           If the model has learned nothing and assigns equal probability $1/V$ to every token in the vocabulary:
-           $$\mathcal{H}(W) = -\frac{1}{N} \sum_{i=1}^N \ln\left(\frac{1}{V}\right) = \ln V \implies \operatorname{PPL}(W) = \exp(\ln V) = V$$
-           The perplexity equals the entire vocabulary size.
+        If the model has learned nothing and assigns equal probability $1/V$ to every token in the vocabulary:
+
+        $$\mathcal{H}(W) = -\frac{1}{N} \sum_{i=1}^N \ln\left(\frac{1}{V}\right) = \ln V \implies \operatorname{PPL}(W) = \exp(\ln V) = V$$
+
+        The perplexity equals the entire vocabulary size.
 
         3. **General Meaning of $\operatorname{PPL} = K$**:
            If a model achieves $\operatorname{PPL} = 12.4$ on a test set, it means that predicting each next token is, on average, as difficult for the model as choosing between $12.4$ equally likely candidate words.

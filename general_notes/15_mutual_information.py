@@ -131,17 +131,27 @@ def _(mo):
     ### Fundamental Mathematical Properties of Mutual Information
 
     1. **Non-negativity and Independence Criterion**:
-       $$I(X; Y) \geq 0$$
-       with equality $I(X; Y) = 0$ if and only if $p(x, y) = p(x)p(y)$ (strict statistical independence).
+
+    $$I(X; Y) \geq 0$$
+
+    with equality $I(X; Y) = 0$ if and only if $p(x, y) = p(x)p(y)$ (strict statistical independence).
+
     2. **Symmetry**:
-       $$I(X; Y) = I(Y; X)$$
+
+    $$I(X; Y) = I(Y; X)$$
+
     3. **Self-Information**:
-       $$I(X; X) = H(X)$$
-       Observing $X$ eliminates all uncertainty about $X$.
+
+    $$I(X; X) = H(X)$$
+
+    Observing $X$ eliminates all uncertainty about $X$.
+
     4. **Invariance to Smooth Invertible Transformations**:
-       If $g$ and $h$ are smooth, invertible coordinate transformations, then:
-       $$I(g(X); h(Y)) = I(X; Y)$$
-       Unlike correlation coefficients, Mutual Information is unaffected by non-linear scalings, rotations, or metric distortions.
+    If $g$ and $h$ are smooth, invertible coordinate transformations, then:
+
+    $$I(g(X); h(Y)) = I(X; Y)$$
+
+    Unlike correlation coefficients, Mutual Information is unaffected by non-linear scalings, rotations, or metric distortions.
     """)
     return
 

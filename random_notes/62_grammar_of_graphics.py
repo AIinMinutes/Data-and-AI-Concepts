@@ -22,7 +22,7 @@ def _(mo):
     return mo.md(r"""
     # The Layered Grammar of Graphics
 
-    [← 61 User-Item Interaction Matrix](61_user_item_interaction_matrix.py) | [Index](../index.html) | [63 Einsum →](63_einsum.py)
+    [← 61 User-Item Interaction Matrix](../general_notes/61_user_item_interaction_matrix.py) | [Index](../index.html) | [63 Einsum →](63_einsum.py)
 
     A statistical graphic is not a standalone chart type selected from an ad-hoc menu (e.g., "pie chart", "scatter plot"). Instead, following **Leland Wilkinson** (*The Grammar of Graphics*, 2005) and **Hadley Wickham** (*A Layered Grammar of Graphics*, 2010), a visualization is a formal composition of independent, modular layers:
 

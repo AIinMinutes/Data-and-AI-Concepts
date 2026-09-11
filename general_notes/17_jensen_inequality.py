@@ -30,8 +30,10 @@ def _(mo):
 
     Key reasons why Jensen's inequality is essential:
     1. **The Engine of Variational Autoencoders (VAEs) and Diffusion Models**: In deep generative models with continuous latent variables $\mathbf{z}$, the true marginal log-likelihood $\ln p(\mathbf{x}) = \ln \int p(\mathbf{x}, \mathbf{z}) d\mathbf{z}$ is computationally intractable. By applying Jensen's inequality to the concave logarithm function, we derive the **Evidence Lower Bound (ELBO)**:
-       $$\ln p(\mathbf{x}) \geq \mathbb{E}_{q(\mathbf{z}|\mathbf{x})}\left[ \ln \frac{p(\mathbf{x}, \mathbf{z})}{q(\mathbf{z}|\mathbf{x})} \right] = \text{ELBO}$$
-       VAEs and latent diffusion models train by maximizing this Jensen lower bound.
+
+    $$\ln p(\mathbf{x}) \geq \mathbb{E}_{q(\mathbf{z}|\mathbf{x})}\left[ \ln \frac{p(\mathbf{x}, \mathbf{z})}{q(\mathbf{z}|\mathbf{x})} \right] = \text{ELBO}$$
+
+    VAEs and latent diffusion models train by maximizing this Jensen lower bound.
     2. **Expectation-Maximization (EM) Algorithm**: In Gaussian Mixture Models (GMMs) and Hidden Markov Models (HMMs), the E-step constructs a tight Jensen lower bound around the incomplete data log-likelihood, and the M-step maximizes it.
     3. **Information Theory and Non-Negativity of Relative Entropy**: Gibbs' inequality ($D_{\text{KL}}(P \| Q) \geq 0$), which establishes that cross-entropy is always greater than or equal to true entropy, is proven in two steps via Jensen's inequality on $f(t) = -\ln(t)$.
     4. **The Arithmetic Mean - Geometric Mean (AM-GM) Inequality**: The fundamental inequality $\frac{1}{n} \sum x_i \geq (\prod x_i)^{1/n}$ is a direct corollary of Jensen's inequality applied to the concave logarithmic function.
@@ -468,7 +470,9 @@ def _(mo):
 
     For an observation $x = 2.0$:
     1. The true marginal likelihood is computed via exact Gaussian convolution:
-       $$p(x) = \mathcal{N}(0, \sigma_z^2 + \sigma_x^2 = 2.0) \implies \ln p(x) \approx -1.8663$$
+
+    $$p(x) = \mathcal{N}(0, \sigma_z^2 + \sigma_x^2 = 2.0) \implies \ln p(x) \approx -1.8663$$
+
     2. We test three variational candidate posteriors $q(z) = \mathcal{N}(\mu_q, \sigma_q^2)$:
        * **Poor Proposal**: $\mu_q = -1.0, \sigma_q = 0.5$
        * **Moderate Proposal**: $\mu_q = 0.5, \sigma_q = 0.8$

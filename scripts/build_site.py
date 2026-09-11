@@ -345,76 +345,6 @@ NOTE_METADATA: dict[str, tuple[str, str, str]] = {
 }
 
 
-PROCESSED_NOTES: list[str] = [
-    "00_introduction.py",
-    "01_inner_product.py",
-    "02_norm_and_metric.py",
-    "03_hyperplanes.py",
-    "04_rank_one_matrices.py",
-    "05_orthogonality.py",
-    "06_moore_penrose_inverse.py",
-    "07_spectral_decomposition.py",
-    "08_matrix_calculus_short.py",
-    "09_condition_number.py",
-    "10_chebyshev_inequality.py",
-    "11_ecdf.py",
-    "12_multivariate_normal_distribution.py",
-    "13_unbiased_vs_consistent.py",
-    "14_dist_of_minimum.py",
-    "15_mutual_information.py",
-    "16_point_biserial.py",
-    "17_jensen_inequality.py",
-    "18_cramer_v.py",
-    "19_kendalltaub.py",
-    "20_spurious_correlation.py",
-    "21_kruskal_wallis.py",
-    "22_acf_and_pacf.py",
-    "23_ewa_and_bias_correction.py",
-    "24_adjusted_r_squared.py",
-    "25_predictive_r2.py",
-    "26_hotelling.py",
-    "27_principal_component_analysis.py",
-    "28_factor_analysis.py",
-    "29_canonical_correlation_analysis.py",
-    "30_correspondence_analysis.py",
-    "31_gaussian_mixture_models.py",
-    "32_elastic_net.py",
-    "33_huber_loss.py",
-    "34_mahalanobis_distance.py",
-    "35_gini_impurity_vs_entropy.py",
-    "36_agglomerative_clustering.py",
-    "37_natural_breaks.py",
-    "38_oversampling.py",
-    "39_permutation_importance.py",
-    "40_pca_vs_feat_ag.py",
-    "41_pseudo_r2.py",
-    "42_multiclass_classification.py",
-    "43_energy.py",
-    "44_logistic_regression.py",
-    "45_shapley.py",
-    "46_model_counterfactuals.py",
-    "47_gelu.py",
-    "48_temperature_scaled_softmax.py",
-    "49_focal_loss_balanced.py",
-    "50_attention_mechanism.py",
-    "51_causal_attention.py",
-    "52_multi_head_attention.py",
-    "53_layer_and_rms_normalization.py",
-    "54_decoding_strategies.py",
-    "55_perplexity.py",
-    "56_reparametrization_trick.py",
-    "57_autoencoder_latent_space.py",
-    "58_pca_for_anomaly_detection.py",
-    "59_vae_on_mnist.py",
-    "60_vae_anomaly_detection.py",
-    "61_user_item_interaction_matrix.py",
-    "62_grammar_of_graphics.py",
-    "63_einsum.py",
-    "64_pivoting.py",
-    "65_cudf.py",
-]
-
-
 @dataclass(frozen=True)
 class Note:
     source: Path
@@ -426,61 +356,80 @@ class Note:
     category: str = "General Notes"
 
 
-def get_all_notes(include_all: bool = False) -> list[Note]:
-    """Discover notes in sequential order. By default, exports only processed notes."""
+def get_all_notes(include_all: bool = True) -> list[Note]:
+    """Discover notes in sequential order. Automatically discovers general_notes and random_notes."""
     notes: list[Note] = []
 
-    # 1. General Notes
+    # 1. General Notes (Notes 00 to 61)
     notes_dir = ROOT / "general_notes"
-    if include_all:
+    if notes_dir.is_dir():
         py_files = sorted(notes_dir.glob("[0-9][0-9]_*.py"))
-    else:
-        py_files = [notes_dir / name for name in PROCESSED_NOTES if (notes_dir / name).is_file()]
-
-    for file in py_files:
-        filename = file.name
-        match = re.match(r"^(\d+)_", filename)
-        num = int(match.group(1)) if match else 0
-        topic, clean_title, blurb = NOTE_METADATA.get(
-            filename,
-            ("General Notes", filename.replace(".py", "").replace("_", " ").title(), "Data and AI concept note"),
-        )
-        notes.append(
-            Note(
-                source=file.relative_to(ROOT),
-                slug=f"fundamentals/{file.stem}",
-                title=f"Note {num:02d}: {clean_title}",
-                topic=topic,
-                blurb=blurb,
-                number=num,
-                category="General Notes",
+        for file in py_files:
+            filename = file.name
+            match = re.match(r"^(\d+)_", filename)
+            num = int(match.group(1)) if match else 0
+            topic, clean_title, blurb = NOTE_METADATA.get(
+                filename,
+                ("General Notes", filename.replace(".py", "").replace("_", " ").title(), "Data and AI concept note"),
             )
-        )
-
-    # 2. Random / Algorithmic Notes (only if include_all is True)
-    if include_all:
-        random_dir = ROOT / "random"
-        if random_dir.is_dir():
-            random_files = sorted(random_dir.glob("*.py"))
-            for i, file in enumerate(random_files, start=100):
-                title = file.stem.replace("_", " ").title()
-                notes.append(
-                    Note(
-                        source=file.relative_to(ROOT),
-                        slug=f"random/{file.stem}",
-                        title=f"Random: {title}",
-                        topic="Random & Programming Patterns",
-                        blurb="Algorithmic problem-solving and programming techniques.",
-                        number=i,
-                        category="Random",
-                    )
+            notes.append(
+                Note(
+                    source=file.relative_to(ROOT),
+                    slug=f"fundamentals/{file.stem}",
+                    title=f"Note {num:02d}: {clean_title}",
+                    topic=topic,
+                    blurb=blurb,
+                    number=num,
+                    category="General Notes",
                 )
+            )
+
+    # 2. Random Notes (Notes 62 to 65 and algorithmic problem solving)
+    random_dir = ROOT / "random_notes"
+    if random_dir.is_dir():
+        random_files = sorted(random_dir.glob("*.py"))
+        for i, file in enumerate(random_files):
+            filename = file.name
+            match = re.match(r"^(\d+)_", filename)
+            if match:
+                num = int(match.group(1))
+                topic, clean_title, blurb = NOTE_METADATA.get(
+                    filename,
+                    (
+                        "Random Notes & Programming Patterns",
+                        filename.replace(".py", "").replace("_", " ").title(),
+                        "Data and AI concept note",
+                    ),
+                )
+                title = f"Note {num:02d}: {clean_title}"
+            else:
+                num = 100 + i
+                title = f"Algorithm: {file.stem.replace('_', ' ').title()}"
+                topic = "Random Notes & Programming Patterns"
+                blurb = "Algorithmic problem-solving and programming techniques."
+
+            notes.append(
+                Note(
+                    source=file.relative_to(ROOT),
+                    slug=f"random_notes/{file.stem}",
+                    title=title,
+                    topic=topic,
+                    blurb=blurb,
+                    number=num,
+                    category="Random Notes",
+                )
+            )
 
     return notes
 
 
 def export_note(
-    note: Note, prev_note: Note | None, next_note: Note | None, output_dir: Path, force: bool = False
+    note: Note,
+    prev_note: Note | None,
+    next_note: Note | None,
+    output_dir: Path,
+    slug_map: dict[str, str] | None = None,
+    force: bool = False,
 ) -> Path:
     html_path = output_dir / note.slug / "index.html"
     source_file = ROOT / note.source
@@ -508,21 +457,35 @@ def export_note(
     if res.returncode != 0:
         print(f"notice: {note.source} exported with code {res.returncode}")
 
-    # Create general_notes/ alias for backwards and URL compatibility
+    # Create backwards compatibility aliases so old URLs never 404
     stem = note.slug.split("/")[-1]
-    compat_path = output_dir / "general_notes" / stem / "index.html"
-    compat_path.parent.mkdir(parents=True, exist_ok=True)
-    redirect_html = f'<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=/{note.slug}/"><link rel="canonical" href="/{note.slug}/"></head><body>Redirecting to <a href="/{note.slug}/">/{note.slug}/</a>...</body></html>'
-    compat_path.write_text(redirect_html, encoding="utf-8")
+    for prefix in ["fundamentals", "general_notes", "random", "random_notes"]:
+        alias_path = output_dir / prefix / stem / "index.html"
+        if alias_path.resolve() != html_path.resolve():
+            alias_path.parent.mkdir(parents=True, exist_ok=True)
+            redirect_html = (
+                f"<!DOCTYPE html><html><head>"
+                f'<meta http-equiv="refresh" content="0; url=/{note.slug}/">'
+                f'<link rel="canonical" href="/{note.slug}/">'
+                f'</head><body>Redirecting to <a href="/{note.slug}/">/{note.slug}/</a>...</body></html>'
+            )
+            alias_path.write_text(redirect_html, encoding="utf-8")
 
     # Inject order links and rewrite .py links in the exported HTML
     if html_path.is_file():
         content = html_path.read_text(encoding="utf-8")
 
-        # Rewrite internal note .py links (e.g. 01_inner_product.py) to web URLs (/fundamentals/01_inner_product/)
+        # Rewrite internal note .py links to web URLs
+        def _rewrite_link(m: re.Match) -> str:
+            fname = m.group(1)
+            target = slug_map.get(f"{fname}.py") if slug_map else None
+            if target:
+                return f'href="/{target}/"'
+            return f'href="/fundamentals/{fname}/"'
+
         content = re.sub(
-            r'href="(?:\./)?(\d{2}_[a-zA-Z0-9_]+)\.py"',
-            r'href="/fundamentals/\1/"',
+            r'href="(?:\.\./[a-zA-Z0-9_]+/|\./)?(\d{2}_[a-zA-Z0-9_]+)\.py"',
+            _rewrite_link,
             content,
         )
 
@@ -553,7 +516,7 @@ def export_note(
 def render_index(notes: list[Note]) -> str:
     # Group notes by Topic / Part
     general_notes = [n for n in notes if n.category == "General Notes"]
-    random_notes = [n for n in notes if n.category == "Random"]
+    random_notes = [n for n in notes if n.category == "Random Notes"]
 
     topics: dict[str, list[Note]] = {}
     for note in general_notes:
@@ -569,6 +532,19 @@ def render_index(notes: list[Note]) -> str:
             for note in topic_notes
         )
         sections_html.append(f'      <h2>{topic}</h2>\n      <ol class="note-list">\n{items}\n      </ol>')
+
+    # Random Notes Section
+    if random_notes:
+        random_items = "\n".join(
+            f"        <li>\n"
+            f'          <a href="/{note.slug}/">{note.title}</a>\n'
+            f'          <p class="blurb">{note.blurb}</p>\n'
+            f"        </li>"
+            for note in random_notes
+        )
+        sections_html.append(
+            f'      <h2>Random Notes & Programming Patterns</h2>\n      <ol class="note-list">\n{random_items}\n      </ol>'
+        )
 
     # Subject Notes Section
     subject_section = """
@@ -601,19 +577,6 @@ def render_index(notes: list[Note]) -> str:
       </ol>
     """
     sections_html.append(paper_section)
-
-    # Random Notes Section
-    if random_notes:
-        random_items = "\n".join(
-            f"        <li>\n"
-            f'          <a href="/{note.slug}/">{note.title}</a>\n'
-            f'          <p class="blurb">{note.blurb}</p>\n'
-            f"        </li>"
-            for note in random_notes
-        )
-        sections_html.append(
-            f'      <h2>Random & Programming Patterns</h2>\n      <ol class="note-list">\n{random_items}\n      </ol>'
-        )
 
     content_body = "\n".join(sections_html)
 
@@ -722,8 +685,9 @@ def render_index(notes: list[Note]) -> str:
 """
 
 
-def build(output_dir: Path, only: str | None, force: bool = False, include_all: bool = False) -> None:
+def build(output_dir: Path, only: str | None, force: bool = False, include_all: bool = True) -> None:
     all_notes = get_all_notes(include_all=include_all)
+    slug_map = {note.source.name: note.slug for note in all_notes}
     selected = [
         note
         for note in all_notes
@@ -736,18 +700,18 @@ def build(output_dir: Path, only: str | None, force: bool = False, include_all: 
     (output_dir / ".nojekyll").write_text("")
     (output_dir / "CNAME").write_text("learnaiinminutes.com\n")
 
-    general_notes = [n for n in all_notes if n.category == "General Notes"]
+    sequence_notes = [n for n in all_notes if n.category in {"General Notes", "Random Notes"}]
     for i, note in enumerate(selected):
         if not (ROOT / note.source).is_file():
             raise SystemExit(f"missing notebook: {note.source}")
-        if note.category == "General Notes":
-            idx = general_notes.index(note)
-            prev_note = general_notes[idx - 1] if idx > 0 else None
-            next_note = general_notes[idx + 1] if idx < len(general_notes) - 1 else None
+        if note in sequence_notes:
+            idx = sequence_notes.index(note)
+            prev_note = sequence_notes[idx - 1] if idx > 0 else None
+            next_note = sequence_notes[idx + 1] if idx < len(sequence_notes) - 1 else None
         else:
             prev_note = None
             next_note = None
-        export_note(note, prev_note, next_note, output_dir, force=force)
+        export_note(note, prev_note, next_note, output_dir, slug_map=slug_map, force=force)
 
     (output_dir / "index.html").write_text(render_index(all_notes), encoding="utf-8")
     print(f"site built -> {output_dir}")

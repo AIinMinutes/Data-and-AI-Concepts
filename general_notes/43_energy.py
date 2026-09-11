@@ -82,24 +82,34 @@ def _(mo):
         The sign of the energy $Q(x) = x^\top A x$ for non-zero vectors $x \neq 0$ defines the definiteness of $A$:
 
         1. **Positive Definite ($A \succ 0$)**:
-           $$x^\top A x > 0 \quad \forall x \neq 0 \iff \lambda_i > 0 \quad \forall i \in \{1, \dots, n\}$$
-           *Geometry*: Strictly convex elliptic bowl opening upwards. Unique global minimum at $x = 0$.
+
+        $$x^\top A x > 0 \quad \forall x \neq 0 \iff \lambda_i > 0 \quad \forall i \in \{1, \dots, n\}$$
+
+        *Geometry*: Strictly convex elliptic bowl opening upwards. Unique global minimum at $x = 0$.
 
         2. **Negative Definite ($A \prec 0$)**:
-           $$x^\top A x < 0 \quad \forall x \neq 0 \iff \lambda_i < 0 \quad \forall i \in \{1, \dots, n\}$$
-           *Geometry*: Strictly concave dome opening downwards. Unique global maximum at $x = 0$.
+
+        $$x^\top A x < 0 \quad \forall x \neq 0 \iff \lambda_i < 0 \quad \forall i \in \{1, \dots, n\}$$
+
+        *Geometry*: Strictly concave dome opening downwards. Unique global maximum at $x = 0$.
 
         3. **Positive Semi-Definite ($A \succeq 0$)**:
-           $$x^\top A x \ge 0 \quad \forall x \iff \lambda_i \ge 0 \quad \forall i \in \{1, \dots, n\}$$
-           *Geometry*: Convex parabolic trough. Flat zero-energy valley along the null space of $A$.
+
+        $$x^\top A x \ge 0 \quad \forall x \iff \lambda_i \ge 0 \quad \forall i \in \{1, \dots, n\}$$
+
+        *Geometry*: Convex parabolic trough. Flat zero-energy valley along the null space of $A$.
 
         4. **Negative Semi-Definite ($A \preceq 0$)**:
-           $$x^\top A x \le 0 \quad \forall x \iff \lambda_i \le 0 \quad \forall i \in \{1, \dots, n\}$$
-           *Geometry*: Concave trough with flat zero-energy directions.
+
+        $$x^\top A x \le 0 \quad \forall x \iff \lambda_i \le 0 \quad \forall i \in \{1, \dots, n\}$$
+
+        *Geometry*: Concave trough with flat zero-energy directions.
 
         5. **Indefinite**:
-           $$x^\top A x \text{ assumes both positive and negative values} \iff \exists \lambda_j > 0 \text{ and } \lambda_k < 0$$
-           *Geometry*: Hyperbolic saddle surface (pringle). The origin $x = 0$ is a saddle point.
+
+        $$x^\top A x \text{ assumes both positive and negative values} \iff \exists \lambda_j > 0 \text{ and } \lambda_k < 0$$
+
+        *Geometry*: Hyperbolic saddle surface (pringle). The origin $x = 0$ is a saddle point.
 
         ### 4. The Rayleigh Quotient and Extreme Curvatures
 

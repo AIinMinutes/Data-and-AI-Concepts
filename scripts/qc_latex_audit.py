@@ -9,12 +9,13 @@ Checks:
 """
 
 import ast
+import inspect
 import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-NOTES_DIR = ROOT / "general_notes"
+NOTE_DIRS = [ROOT / "general_notes", ROOT / "random_notes"]
 
 
 def extract_markdown_cells(file_path: Path) -> list[tuple[int, str]]:
@@ -85,8 +86,12 @@ def check_latex_in_text(text: str, file_name: str, lineno: int) -> list[str]:
 
 
 def main():
-    py_files = sorted(NOTES_DIR.glob("[0-9][0-9]_*.py"))
-    print(f"Auditing LaTeX across {len(py_files)} notebooks in {NOTES_DIR.name}...")
+    py_files = []
+    for d in NOTE_DIRS:
+        if d.is_dir():
+            py_files.extend(d.glob("*.py"))
+    py_files = sorted(py_files, key=lambda f: f.name)
+    print(f"Auditing LaTeX across {len(py_files)} notebooks in {[d.name for d in NOTE_DIRS]}...")
 
     total_issues = 0
     clean_notes = 0
@@ -95,7 +100,7 @@ def main():
         cells = extract_markdown_cells(py_file)
         file_issues = []
         for lineno, md_text in cells:
-            issues = check_latex_in_text(md_text, py_file.name, lineno)
+            issues = check_latex_in_text(inspect.cleandoc(md_text), py_file.name, lineno)
             file_issues.extend(issues)
 
         if file_issues:
