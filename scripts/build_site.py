@@ -409,6 +409,7 @@ PROCESSED_NOTES: list[str] = [
     "60_vae_anomaly_detection.py",
     "61_user_item_interaction_matrix.py",
     "62_grammar_of_graphics.py",
+    "63_einsum.py",
 ]
 
 
