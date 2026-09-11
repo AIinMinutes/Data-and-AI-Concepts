@@ -380,6 +380,7 @@ PROCESSED_NOTES: list[str] = [
     "31_gaussian_mixture_models.py",
     "32_elastic_net.py",
     "33_huber_loss.py",
+    "34_mahalanobis_distance.py",
 ]
 
 
