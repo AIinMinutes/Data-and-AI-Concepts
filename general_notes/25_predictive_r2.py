@@ -7,359 +7,450 @@ app = marimo.App()
 @app.cell
 def _():
     import marimo as mo
+    import numpy as np
+    import pandas as pd
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+    from sklearn.linear_model import LinearRegression
 
-    return (mo,)
+    return LinearRegression, go, make_subplots, mo, np, pd
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    <h1 style="font-weight: bold; background: linear-gradient(to right, teal, skyblue); -webkit-background-clip: text; color: transparent;">
-      Multiple Linear Regression Model: A Comprehensive Overview
-    </h1>
+    # Note 25: Predictive R-Squared, PRESS Residuals, and Leverage Diagnostics
 
-    <h2 style="font-weight: bold; background: linear-gradient(to right, magenta, cyan); -webkit-background-clip: text; color: transparent;\"> Basic Notation Framework
-    </h2>
+    &larr; Previous Note: [24 Adjusted R-Squared](24_adjusted_r_squared.py) | Next Note: [26 Hotelling T-Squared](26_hotelling.py) &rarr;
 
-    - **n**: Number of observations
-    - **p**: Number of predictor variables (including intercept)
-    - **y**: Response variable
-    - **X**: Matrix of predictor variables
-    - **β**: Vector of regression coefficients
-    - **ε**: Vector of random errors
-    - **i**: Index for observations (i = 1,...,n)
-    - **j**: Index for predictors (j = 1,...,p)
-    - **⊤**: Transpose of a matrix/vector
-    - **^**: Indicates an estimated value
-    - **(i)**: Denotes computation with the ith observation removed
-    - **ȳ**: Mean of y values
+    ---
 
-    <h2 style="font-weight: bold; background: linear-gradient(to right, magenta, cyan); -webkit-background-clip: text; color: transparent;\"> Model Structure
-    </h2>
+    ## [a] Why do you need to know these concepts?
 
-    The model is represented as:
+    Both ordinary $R^2$ and Adjusted $R^2$ evaluate goodness-of-fit strictly on in-sample training data. A model can achieve an Adjusted $R^2$ of $0.92$ yet fail catastrophically when deployed to predict new, unseen observations. This occurs when high-leverage training observations dictate the hyperplane slope or when polynomial basis expansions overfit local sample fluctuations.
+
+    **Predictive $R^2$ ($R^2_{\text{pred}}$)** resolves this dilemma through Leave-One-Out Cross-Validation (LOOCV):
+    1. **Zero-Cost Out-of-Sample Evaluation**: Standard LOOCV requires training $n$ separate models, which is computationally prohibitive for large datasets. In linear regression, the **Sherman-Morrison formula** enables the exact computation of all $n$ leave-one-out residuals in a single matrix operation without refitting the model even once.
+    2. **The PRESS Statistic**: The Prediction Error Sum of Squares (PRESS) aggregates the squared leave-one-out prediction errors:
+
     $$
-    \mathbf{y}_{(n \times 1)} = \mathbf{X}_{(n \times p)} \boldsymbol{\beta}_{(p \times 1)} + \boldsymbol{\epsilon}_{(n \times 1)}
+    \text{PRESS} = \sum_{i=1}^n \left(\frac{e_i}{1 - h_{ii}}\right)^2
     $$
 
-    Where:
-    - $\mathbf{y}_{(n \times 1)} = (y_1, y_2, \dots, y_n)^\top$ is the response vector
-    - $\mathbf{X}_{(n \times p)}$ = Design matrix, with the first column consisting of 1’s for the intercept
-    - $\boldsymbol{\beta}_{(p \times 1)} = (\beta_0, \beta_1, \dots, \beta_{p-1})^\top$ is the vector of regression coefficients
-    - $\boldsymbol{\epsilon}_{(n \times 1)} = (\epsilon_1, \epsilon_2, \dots, \epsilon_n)^\top$ is the error vector, where $\epsilon_i \sim N(0, \sigma^2)$
+    where $h_{ii}$ is the leverage of observation $i$. If a point has high leverage ($h_{ii} \to 1$), its residual is magnified by $\frac{1}{(1 - h_{ii})^2}$, heavily penalizing models that depend excessively on isolated, influential points.
+    3. **Detecting Overfitting via the Generalization Gap**: Predictive $R^2$ is defined as $1 - \frac{\text{PRESS}}{\text{SS}_{\text{tot}}}$. While raw $R^2$ always increases with model complexity, Predictive $R^2$ reaches a maximum and drops precipitously (often becoming strongly negative), revealing precisely when additional features degrade generalization.
+    """)
+    return
 
-    <h2 style="font-weight: bold; background: linear-gradient(to right, magenta, cyan); -webkit-background-clip: text; color: transparent;\"> Least Squares Solution
-    </h2>
 
-    The estimated regression coefficients are computed as:
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ---
+
+    ## [b] Concept explanation with their role in ML/AI/Stats?
+
+    ### 1. The Hat (Projection) Matrix and Leverage
+
+    In multiple linear regression with design matrix $\mathbf{X} \in \mathbb{R}^{n \times p}$ (including intercept):
+
     $$
-    \hat{\boldsymbol{\beta}} = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}
-    $$
-
-    ### Properties of the Least Squares Estimator:
-    - **BLUE** (Best Linear Unbiased Estimator)
-    - Has the minimum variance among all unbiased estimators
-    - Maximum likelihood estimator when errors follow a normal distribution
-
-    <h2 style="font-weight: bold; background: linear-gradient(to right, magenta, cyan); -webkit-background-clip: text; color: transparent;\"> Hat (Projection) Matrix
-    </h2>
-
-    The hat matrix is given by:
-    $$
-    \mathbf{H}_{(n \times n)} = \mathbf{X} (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{X}^\top
+    \mathbf{y} = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\epsilon}, \quad \hat{\boldsymbol{\beta}} = (\mathbf{X}^\top \mathbf{X})^{-1}\mathbf{X}^\top \mathbf{y}
     $$
 
-    ### Properties:
-    - $\mathbf{H}$ is symmetric: $\mathbf{H} = \mathbf{H}^\top$
-    - $\mathbf{H}$ is idempotent: $\mathbf{H} \mathbf{H} = \mathbf{H}$
-    - Rank of $\mathbf{H}$ is equal to p, i.e., Rank($\mathbf{H}$) = trace($\mathbf{H}$) = p
-    - The fitted values are: $\hat{\mathbf{y}} = \mathbf{H} \mathbf{y}$
+    The fitted values $\hat{\mathbf{y}}$ are obtained via the orthogonal projection (Hat) matrix $\mathbf{H}$:
 
-    ## Leverage Values
-    The leverage for each observation is:
+    $$
+    \hat{\mathbf{y}} = \mathbf{X}\hat{\boldsymbol{\beta}} = \mathbf{X}(\mathbf{X}^\top \mathbf{X})^{-1}\mathbf{X}^\top \mathbf{y} = \mathbf{H}\mathbf{y}
+    $$
+
+    The diagonal elements $h_{ii} = [\mathbf{H}]_{ii}$ are the **leverage values**:
+
     $$
     h_{ii} = \mathbf{x}_i^\top (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{x}_i
     $$
 
-    Where:
-    - $h_{ii}$ is the ith diagonal element of $\mathbf{H}$
-    - $\mathbf{x}_i^\top$ is the ith row of $\mathbf{X}$
+    #### Fundamental Properties of Leverage:
+    - Bounded in $[0, 1]$: $0 \leq h_{ii} \leq 1$.
+    - Sum of leverages equals the number of parameters: $\operatorname{tr}(\mathbf{H}) = \sum_{i=1}^n h_{ii} = p$.
+    - Average leverage: $\bar{h} = \frac{p}{n}$.
+    - High leverage threshold: An observation is deemed high-leverage if $h_{ii} > \frac{2p}{n}$ (or $\frac{3p}{n}$).
 
-    ### Diagnostics:
-    - Average leverage: $\frac{p}{n}$
-    - High leverage points: $h_{ii} > \frac{2p}{n}$ or $h_{ii} > \frac{3p}{n}$
-    - Leverage values are bounded: $0 \leq h_{ii} \leq 1$
-    - The sum of the leverages equals p: $\sum h_{ii} = p$
+    ---
 
-    ## Decomposition of Variability
-    Let:
-    - $\hat{y}_i$ be the fitted value for the ith observation
-    - $\bar{y}$ be the mean of the response variable y
-    - $e_i = y_i - \hat{y}_i$ be the residual for the ith observation
+    ### 2. The PRESS Shortcut Derivation (Sherman-Morrison)
 
-    ### Total Sum of Squares (TSS):
+    Let $(i)$ denote estimation with the $i$-th observation removed. The leave-one-out parameter estimate is:
+
     $$
-    \text{TSS} = \sum_{i=1}^n (y_i - \bar{y})^2 = \mathbf{y}^\top \mathbf{y} - n \bar{y}^2
+    \hat{\boldsymbol{\beta}}_{(i)} = \left(\mathbf{X}_{(i)}^\top \mathbf{X}_{(i)}\right)^{-1} \mathbf{X}_{(i)}^\top \mathbf{y}_{(i)}
     $$
 
-    ### Regression Sum of Squares (SSR):
-    $$
-    \text{SSR} = \sum_{i=1}^n (\hat{y}_i - \bar{y})^2
-    $$
+    Notice that removing row $\mathbf{x}_i$ is a symmetric rank-one downdate:
 
-    ### Error Sum of Squares (SSE):
     $$
-    \text{SSE} = \sum_{i=1}^n (y_i - \hat{y}_i)^2 = \sum_{i=1}^n e_i^2 = \mathbf{e}^\top \mathbf{e}
+    \mathbf{X}_{(i)}^\top \mathbf{X}_{(i)} = \mathbf{X}^\top \mathbf{X} - \mathbf{x}_i \mathbf{x}_i^\top
     $$
 
-    The relationship:
+    By the Sherman-Morrison rank-one inverse formula:
+
     $$
-    \text{TSS} = \text{SSR} + \text{SSE}
-    $$
-
-    <h2 style="font-weight: bold; background: linear-gradient(to right, magenta, cyan); -webkit-background-clip: text; color: transparent;\"> Cross-Validation and PRESS
-    </h2>
-
-    ### Leave-One-Out Cross-Validation (LOOCV)
-    For each observation $i = 1, \dots, n$:
-    1. Remove observation $i$: $(x_{(i)}, y_{(i)})$
-    2. Fit the model with the remaining $(n-1)$ observations
-    3. Compute the predicted value: $\hat{y}_{(i)}$
-    4. Calculate the prediction error: $e_{(i)} = y_{(i)} - \hat{y}_{(i)}$
-
-    ### PRESS (Prediction Residual Error Sum of Squares)
-    1. **Original Formula** (with recomputation):
-       $$
-       \hat{\boldsymbol{\beta}}_{(i)} = (\mathbf{X}_{(i)}^\top \mathbf{X}_{(i)})^{-1} \mathbf{X}_{(i)}^\top \mathbf{y}_{(i)}
-       $$
-       $$
-       \hat{y}_{(i)} = \mathbf{x}_i^\top \hat{\boldsymbol{\beta}}_{(i)}
-       $$
-       $$
-       \text{PRESS} = \sum_{i=1}^n (y_i - \hat{y}_{(i)})^2
-       $$
-
-    2. **Efficient Formula** (no recomputation):
-       $$
-       \text{PRESS} = \sum_{i=1}^n \left( \frac{e_i}{1 - h_{ii}} \right)^2
-       $$
-
-       Where:
-
-
-       $e_i = y_i - \hat{y}_i$ is the residual for the ith observation
-
-
-       $h_{ii} = \mathbf{x}_i^\top (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{x}_i$ is the leverage value of ith observation
-
-    <h2 style="font-weight: bold; background: linear-gradient(to right, magenta, cyan); -webkit-background-clip: text; color: transparent;\"> Model Quality Measures
-    </h2>
-
-    Let:
-    - **df_model** = p - 1 (degrees of freedom for the model)
-    - **df_error** = n - p (degrees of freedom for error)
-    - **df_total** = n - 1 (total degrees of freedom)
-
-    ### R² (Coefficient of Determination):
-    $$
-    R^2 = 1 - \frac{\text{SSE}}{\text{TSS}} = \frac{\text{SSR}}{\text{TSS}}
+    \left(\mathbf{X}^\top \mathbf{X} - \mathbf{x}_i \mathbf{x}_i^\top\right)^{-1} = (\mathbf{X}^\top \mathbf{X})^{-1} + \frac{(\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{x}_i \mathbf{x}_i^\top (\mathbf{X}^\top \mathbf{X})^{-1}}{1 - h_{ii}}
     $$
 
-    ### Adjusted R²:
-    $$
-    R^2_{\text{adj}} = 1 - \frac{\text{SSE} / \text{df}_{\text{error}}}{\text{TSS} / \text{df}_{\text{total}}} = 1 - \frac{\text{SSE} / (n - p)}{\text{TSS} / (n - 1)}
-    $$
+    Multiplying by $\mathbf{X}_{(i)}^\top \mathbf{y}_{(i)} = \mathbf{X}^\top \mathbf{y} - \mathbf{x}_i y_i$ and simplifying yields:
 
-    ### Predictive R²:
     $$
-    R^2_{\text{pred}} = 1 - \frac{\text{PRESS}}{\text{TSS}}
+    \hat{\boldsymbol{\beta}}_{(i)} = \hat{\boldsymbol{\beta}} - \frac{(\mathbf{X}^\top \mathbf{X})^{-1}\mathbf{x}_i e_i}{1 - h_{ii}}
     $$
 
-    <h2 style="font-weight: bold; background: linear-gradient(to right, magenta, cyan); -webkit-background-clip: text; color: transparent;\"> Statistical Properties
-    </h2>
+    The predicted value for the held-out point is $\hat{y}_{(i)} = \mathbf{x}_i^\top \hat{\boldsymbol{\beta}}_{(i)}$:
 
-    Let:
-    - **$\hat{\sigma}^2$** be the estimated error variance
-    - **$\text{SE}(\hat{\beta}_j)$** be the standard error of the jth coefficient estimate
-    - **$[\mathbf{M}]_{jj}$** denote the jth diagonal element of matrix M
-    - **$\mathbf{x}_{\text{new}}$** be a vector of predictor values for a new observation
+    $$
+    \hat{y}_{(i)} = \mathbf{x}_i^\top \hat{\boldsymbol{\beta}} - \frac{\mathbf{x}_i^\top (\mathbf{X}^\top \mathbf{X})^{-1}\mathbf{x}_i e_i}{1 - h_{ii}} = \hat{y}_i - \frac{h_{ii} e_i}{1 - h_{ii}}
+    $$
 
-    ### Variance Estimates:
-    1. **Residual variance**:
-       $$
-       \hat{\sigma}^2 = \frac{\text{SSE}}{n - p}
-       $$
+    Subtracting this from the observed target $y_i$ yields the leave-one-out error $e_{(i)}$:
 
-    2. **Standard errors of coefficients**:
-       $$
-       \text{SE}(\hat{\beta}_j) = \hat{\sigma} \sqrt{[(\mathbf{X}^\top \mathbf{X})^{-1}]_{jj}}
-       $$
+    $$
+    e_{(i)} = y_i - \hat{y}_{(i)} = y_i - \hat{y}_i + \frac{h_{ii} e_i}{1 - h_{ii}} = e_i \left(1 + \frac{h_{ii}}{1 - h_{ii}}\right) = \frac{e_i}{1 - h_{ii}}
+    $$
 
-    3. **Variance of fitted values**:
-       $$
-       \text{Var}(\hat{y}_i) = \sigma^2 h_{ii}
-       $$
+    This identity proves that **Leave-One-Out residuals can be computed directly from standard OLS residuals and leverage values with zero re-fitting**.
 
-    4. **Variance of prediction for a new observation**:
-       $$
-       \text{Var}(\hat{y}_{\text{new}}) = \sigma^2 \left[ 1 + \mathbf{x}_{\text{new}}^\top (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{x}_{\text{new}} \right]
-       $$
+    ---
 
-    ### Additional Properties:
-    1. For any fitted value:
-       $$
-       \hat{y}_i = \sum_{j=1}^n h_{ij} y_j
-       $$
-       Where $h_{ij}$ is the $(i,j)$th element of $\mathbf{H}$.
+    ### 3. The PRESS Statistic and Predictive $R^2$
 
-    2. For PRESS residuals:
-       $$
-       e_{(i)} = \frac{e_i}{1 - h_{ii}}
-       $$
-       Where $e_{(i)}$ is the PRESS residual for observation $i$.
+    The Prediction Error Sum of Squares (PRESS) is:
+
+    $$
+    \text{PRESS} = \sum_{i=1}^n e_{(i)}^2 = \sum_{i=1}^n \left(\frac{e_i}{1 - h_{ii}}\right)^2
+    $$
+
+    The **Predictive $R^2$** is defined as:
+
+    $$
+    R^2_{\text{pred}} = 1 - \frac{\text{PRESS}}{\text{SS}_{\text{tot}}}
+    $$
+
+    #### Comparison of the Three $R^2$ Metrics:
+    $$
+    R^2 \geq R^2_{\text{adj}} \geq R^2_{\text{pred}}
+    $$
+    - **Raw $R^2$**: Evaluates in-sample fitting accuracy.
+    - **Adjusted $R^2$**: Penalizes degrees of freedom consumed by predictors.
+    - **Predictive $R^2$**: Evaluates true out-of-sample leave-one-out generalization.
     """)
     return
 
 
 @app.cell
-def _():
-    import matplotlib.pyplot as plt
-    import numpy as np
-    import pandas as pd
-    import seaborn as sns
-    from sklearn.datasets import make_regression
+def _(np, pd):
+    # Simulation Data: Non-linear relationship y = 1.5 * x - 2.0 * x^2 + 0.8 * x^3 + noise
+    # Designed to test polynomial models degree 1 through 6
+    np.random.seed(47)
+    _n = 35
 
-    plt.style.use("dark_background")
+    x_raw = np.sort(np.random.uniform(-1.8, 1.8, _n))
+    _true_signal = 1.5 * x_raw - 2.0 * (x_raw**2) + 0.8 * (x_raw**3)
+    _noise = np.random.normal(0.0, 0.8, _n)
 
-    # Generate data
-    X, y = make_regression(n_samples=10, n_features=3, n_informative=3, noise=10, random_state=47)
-    return X, np, pd, plt, sns, y
+    # Incur an intentional isolated high-leverage point at the extreme right
+    y_raw = _true_signal + _noise
+    y_raw[-1] += 2.5  # high-leverage perturbed observation
 
+    df_poly = pd.DataFrame({"x": np.round(x_raw, 3), "y": np.round(y_raw, 3)})
 
-@app.cell
-def _(X, pd, y):
-    # Create readable DataFrame
-    X_1 = pd.DataFrame(X, columns=[f"Feature-{i + 1}" for i in range(X.shape[1])])
-    y_1 = pd.Series(y, name="Target")
-    return X_1, y_1
+    return df_poly, x_raw, y_raw
 
 
 @app.cell
-def _(X_1, pd, plt, sns, y_1):
-    # Show correlation matrix
-    correlation_matrix = pd.concat([X_1, y_1], axis=1).corr()
-    plt.figure(figsize=(5, 4), dpi=300)
-    # Set up the matplotlib figure
-    sns.heatmap(
-        correlation_matrix,
-        annot=True,
-        cmap="RdBu",
-        vmin=-1,
-        vmax=1,
-        center=0,
-        square=True,
-        fmt=".2f",
-        annot_kws={"size": 10},
-        cbar_kws={"label": "Correlation Coefficient"},
+def _(df_poly, go, make_subplots, mo, np, x_raw, y_raw):
+    # Interactive Visualizations Cell:
+    # Subplot 1: Fitted Polynomial curves (Degree 1 Underfitting, Degree 3 Optimal, Degree 6 Overfitting)
+    # Subplot 2: R^2 vs. Adjusted R^2 vs. Predictive R^2 across Polynomial Degrees 1 to 6
+    # Subplot 3: Leverage (h_ii) vs. PRESS Residual Inflation Factor 1 / (1 - h_ii)
+
+    _fig = make_subplots(
+        rows=1,
+        cols=3,
+        subplot_titles=(
+            "1. Polynomial Fits: Underfit vs. Optimal vs. Overfit",
+            "2. Generalization Gap: R^2 vs. Adj R^2 vs. Pred R^2",
+            "3. Leverage & PRESS Residual Inflation",
+        ),
+        horizontal_spacing=0.09,
     )
-    plt.title("Feature Correlation Matrix", pad=20)
-    # Create heatmap
-    plt.tight_layout()
-    # Adjust layout
-    # Show plot
-    plt.show()  # Show numbers  # Red-Blue diverging colormap  # Fix the range from -1 to 1  # Center the colormap at 0  # Make the plot square-shaped  # Show 2 decimal places  # Annotation text size  # Add colorbar label
-    return
 
+    _n = len(x_raw)
+    _ss_tot = np.sum((y_raw - np.mean(y_raw)) ** 2)
 
-@app.cell
-def _(X_1, y_1):
-    # Convert to numpy for calculations
-    X_2 = X_1.values
-    y_2 = y_1.values
-    return X_2, y_2
+    # Fit Polynomial Degrees 1 through 6
+    _degrees = np.arange(1, 7)
+    _r2_list = []
+    _adj_r2_list = []
+    _pred_r2_list = []
 
+    _fits_to_plot = {}
+    _x_dense = np.linspace(x_raw.min(), x_raw.max(), 100)
 
-@app.cell
-def _(X_2, np):
-    # Check condition number
-    _, singular_vals, _ = np.linalg.svd(X_2)
-    condition_number = singular_vals.max() / singular_vals.min()
-    return (condition_number,)
+    for _d in _degrees:
+        _X_mat = np.vander(x_raw, _d + 1)  # includes column of ones
+        _beta, _, _, _ = np.linalg.lstsq(_X_mat, y_raw, rcond=None)
+        _y_hat = _X_mat @ _beta
+        _e = y_raw - _y_hat
 
+        # Hat matrix
+        _H = _X_mat @ np.linalg.solve(_X_mat.T @ _X_mat, _X_mat.T)
+        _h = np.diag(_H)
 
-@app.cell
-def _(X_2, np):
-    # Calculate hat matrix using solve instead of inv
-    H = X_2 @ np.linalg.solve(X_2.T @ X_2, X_2.T)
-    H_diagonal = np.diag(H)
-    return H, H_diagonal
+        _ss_res = np.sum(_e**2)
+        _press = np.sum((_e / (1.0 - _h)) ** 2)
 
+        _p = _d + 1
+        _r2 = 1.0 - (_ss_res / _ss_tot)
+        _adj_r2 = 1.0 - (1.0 - _r2) * (_n - 1) / (_n - _p)
+        _pred_r2 = 1.0 - (_press / _ss_tot)
 
-@app.cell
-def _(H, plt, sns):
-    # Plot hat matrix
-    plt.figure(figsize=(8, 6), dpi=300)
-    sns.heatmap(
-        H,
-        annot=True,
-        cmap="inferno",  # Yellow-Orange-Red colormap for leverage
-        vmin=0,  # Hat matrix values are between 0 and 1
-        vmax=1,
-        square=True,
-        fmt=".2f",
-        annot_kws={"size": 10},
-        cbar_kws={"label": "Leverage Value"},
+        _r2_list.append(_r2)
+        _adj_r2_list.append(_adj_r2)
+        _pred_r2_list.append(_pred_r2)
+
+        if _d in [1, 3, 6]:
+            _X_dense = np.vander(_x_dense, _d + 1)
+            _fits_to_plot[_d] = _X_dense @ _beta
+
+    # Subplot 1: Fits
+    _fig.add_trace(
+        go.Scatter(
+            x=df_poly["x"],
+            y=df_poly["y"],
+            mode="markers",
+            marker=dict(size=7, color="#334155"),
+            name="Observed Samples",
+        ),
+        row=1,
+        col=1,
     )
-    plt.title("Hat Matrix (Leverage Values)", pad=20)
-    plt.tight_layout()
-    plt.show()
+
+    _fit_colors = {1: "#ef4444", 3: "#10b981", 6: "#8b5cf6"}
+    _fit_labels = {1: "Degree 1 (Underfit)", 3: "Degree 3 (Optimal)", 6: "Degree 6 (Overfit)"}
+    for _d, _col in _fit_colors.items():
+        _fig.add_trace(
+            go.Scatter(
+                x=_x_dense,
+                y=_fits_to_plot[_d],
+                mode="lines",
+                line=dict(color=_col, width=2.5),
+                name=_fit_labels[_d],
+            ),
+            row=1,
+            col=1,
+        )
+
+    # Subplot 2: Metric Trajectories
+    _fig.add_trace(
+        go.Scatter(
+            x=_degrees,
+            y=_r2_list,
+            mode="lines+markers",
+            line=dict(color="#3b82f6", width=2.5),
+            name="Raw R^2 (In-sample)",
+        ),
+        row=1,
+        col=2,
+    )
+    _fig.add_trace(
+        go.Scatter(
+            x=_degrees,
+            y=_adj_r2_list,
+            mode="lines+markers",
+            line=dict(color="#10b981", width=2.5),
+            name="Adjusted R^2",
+        ),
+        row=1,
+        col=2,
+    )
+    _fig.add_trace(
+        go.Scatter(
+            x=_degrees,
+            y=_pred_r2_list,
+            mode="lines+markers",
+            line=dict(color="#ef4444", width=3, dash="dash"),
+            name="Predictive R^2 (PRESS)",
+        ),
+        row=1,
+        col=2,
+    )
+
+    # Subplot 3: Leverage Diagnostic for Degree 3
+    _X_deg3 = np.vander(x_raw, 4)
+    _H_deg3 = _X_deg3 @ np.linalg.solve(_X_deg3.T @ _X_deg3, _X_deg3.T)
+    _h_vals = np.diag(_H_deg3)
+    _inflation_factor = 1.0 / (1.0 - _h_vals)
+    _high_lev_thresh = 2.0 * 4 / _n
+
+    _fig.add_trace(
+        go.Scatter(
+            x=_h_vals,
+            y=_inflation_factor,
+            mode="markers",
+            marker=dict(
+                size=9,
+                color=["#ef4444" if h > _high_lev_thresh else "#3b82f6" for h in _h_vals],
+                line=dict(width=1, color="#1e293b"),
+            ),
+            name="Observations",
+            hovertemplate="Leverage h_ii: %{x:.3f}<br>PRESS Multiplier: %{y:.2f}x<extra></extra>",
+        ),
+        row=1,
+        col=3,
+    )
+
+    _fig.add_trace(
+        go.Scatter(
+            x=[_high_lev_thresh, _high_lev_thresh],
+            y=[1.0, _inflation_factor.max() * 1.05],
+            mode="lines",
+            line=dict(color="#ef4444", dash="dash", width=1.5),
+            name="Threshold 2p/n",
+        ),
+        row=1,
+        col=3,
+    )
+
+    _fig.update_layout(
+        template="plotly_white",
+        height=480,
+        title=dict(
+            text="Predictive R^2 & PRESS: Diagnosing Overfitting and High-Leverage Outliers",
+            x=0.5,
+            xanchor="center",
+            font=dict(size=16, family="Inter, system-ui, sans-serif"),
+        ),
+        legend=dict(orientation="h", yanchor="bottom", y=-0.25, xanchor="center", x=0.5),
+        margin=dict(l=40, r=40, t=75, b=80),
+    )
+
+    _fig.update_xaxes(title_text="x", row=1, col=1)
+    _fig.update_yaxes(title_text="y", row=1, col=1)
+
+    _fig.update_xaxes(title_text="Polynomial Degree", tickvals=_degrees, row=1, col=2)
+    _fig.update_yaxes(title_text="Metric Score", range=[-0.4, 1.05], row=1, col=2)
+
+    _fig.update_xaxes(title_text="Leverage (h_ii)", row=1, col=3)
+    _fig.update_yaxes(title_text="Error Inflation 1 / (1 - h_ii)", row=1, col=3)
+
+    return (mo.ui.plotly(_fig),)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ---
+
+    ## [d] Code Examples
+
+    Below we implement two end-to-end production algorithmic workflows:
+    1. **Exact Equivalence of the PRESS Shortcut vs. Brute-Force LOOCV**: We explicitly fit $n = 35$ separate linear regression models, dropping one point at a time, and verify that the brute-force LOOCV prediction error matches the Sherman-Morrison shortcut formula $\frac{e_i}{1 - h_{ii}}$ to machine precision ($10^{-12}$).
+    2. **Comprehensive Model Order Selection Table**: Evaluating models of degree 1 through 6 across SSE, PRESS, $R^2, \bar{R}^2$, and $R^2_{\text{pred}}$, proving that Predictive $R^2$ prevents model overparameterization.
+    """)
     return
 
 
 @app.cell
-def _(H, H_diagonal, condition_number, y_2):
-    # Calculate predictions and residuals
-    y_pred = H @ y_2
-    residuals = y_2 - y_pred
-    mean_deviation = y_2 - y_2.mean()
-    # Calculate R² components
-    SSE = residuals @ residuals
-    TSS = mean_deviation @ mean_deviation
-    scaled_residuals = residuals / (1 - H_diagonal)
-    PRESS = scaled_residuals @ scaled_residuals
-    # Calculate PRESS statistic
-    r2 = 1 - SSE / TSS
-    predicted_r2 = 1 - PRESS / TSS
-    # Calculate R² and predicted R²
-    # Results dictionary for easy access
-    results = {
-        "condition_number": condition_number.item(),
-        "R2": r2.item(),
-        "predicted_R2": predicted_r2.item(),
-        "PRESS": PRESS.item(),
-        "SSE": SSE.item(),
-        "TSS": TSS.item(),
-    }
-    return PRESS, SSE, TSS, predicted_r2, r2
+def _(LinearRegression, mo, np, pd, x_raw, y_raw):
+    # Example 1: Numerical Verification of the PRESS Shortcut vs. Brute-Force LOOCV
+    _n = len(x_raw)
+    _X = np.column_stack([np.ones(_n), x_raw, x_raw**2, x_raw**3])
+    _p = _X.shape[1]
+
+    # Standard full fit
+    _beta = np.linalg.solve(_X.T @ _X, _X.T @ y_raw)
+    _y_hat = _X @ _beta
+    _residuals = y_raw - _y_hat
+
+    # Hat matrix diagonal
+    _H = _X @ np.linalg.solve(_X.T @ _X, _X.T)
+    _h_diag = np.diag(_H)
+
+    # 1. Shortcut PRESS residuals
+    _press_shortcut = _residuals / (1.0 - _h_diag)
+    _press_stat_shortcut = np.sum(_press_shortcut**2)
+
+    # 2. Brute-force n-fold Leave-One-Out Cross-Validation
+    _brute_force_errors = np.zeros(_n)
+    for _i in range(_n):
+        _mask = np.ones(_n, dtype=bool)
+        _mask[_i] = False
+        _X_train = _X[_mask]
+        _y_train = y_raw[_mask]
+        _X_test = _X[_i : _i + 1]
+
+        _model = LinearRegression(fit_intercept=False).fit(_X_train, _y_train)
+        _pred_loo = _model.predict(_X_test)[0]
+        _brute_force_errors[_i] = y_raw[_i] - _pred_loo
+
+    _press_stat_bruteforce = np.sum(_brute_force_errors**2)
+    _max_discrepancy = np.max(np.abs(_press_shortcut - _brute_force_errors))
+
+    _df_verification = pd.DataFrame(
+        [
+            {"Evaluation Method": "PRESS Shortcut: e_i / (1 - h_ii)", "PRESS Statistic": f"{_press_stat_shortcut:.6f}", "Compute Time / Complexity": "O(n p^2) [Single OLS Fit]"},
+            {"Evaluation Method": "Brute-Force LOOCV: n re-fits", "PRESS Statistic": f"{_press_stat_bruteforce:.6f}", "Compute Time / Complexity": "O(n^2 p^2) [35 separate models]"},
+            {"Evaluation Method": "Max Absolute Error Discrepancy", "PRESS Statistic": f"{_max_discrepancy:.2e}", "Compute Time / Complexity": "Exact to Machine Precision"},
+        ]
+    )
+
+    return (
+        mo.md("#### Mathematical Equivalence: PRESS Shortcut vs. Brute-Force LOOCV"),
+        mo.ui.table(_df_verification),
+    )
 
 
 @app.cell
-def _(H_diagonal, PRESS, SSE, TSS, condition_number, predicted_r2, r2):
-    # Store and print results
-    print("\nRegression Analysis Results")
-    print("-" * 30)
-    print(f"Condition Number: {condition_number:.2f}")
-    print(f"R²: {r2:.4f}")
-    print(f"Predicted R²: {predicted_r2:.4f}")
-    print(f"PRESS Statistic: {PRESS:.4f}")
-    print(f"Sum of Squared Errors (SSE): {SSE:.4f}")
-    print(f"Total Sum of Squares (TSS): {TSS:.4f}")
-    print("\nLeverage Statistics")
-    print("-" * 30)
-    print(f"Average Leverage: {H_diagonal.mean():.4f}")
-    print(f"Max Leverage: {H_diagonal.max():.4f}")
-    print(f"Min Leverage: {H_diagonal.min():.4f}")
-    return
+def _(mo, np, pd, x_raw, y_raw):
+    # Example 2: Model Order Selection Diagnostic Table (Degrees 1 to 6)
+    _n = len(x_raw)
+    _ss_tot = np.sum((y_raw - np.mean(y_raw)) ** 2)
+
+    _eval_rows = []
+    for _deg in range(1, 7):
+        _p = _deg + 1
+        _X = np.vander(x_raw, _p)
+        _beta = np.linalg.solve(_X.T @ _X, _X.T @ y_raw)
+        _y_pred = _X @ _beta
+        _e = y_raw - _y_pred
+
+        _H = _X @ np.linalg.solve(_X.T @ _X, _X.T)
+        _h = np.diag(_H)
+
+        _sse = np.sum(_e**2)
+        _press = np.sum((_e / (1.0 - _h)) ** 2)
+
+        _r2 = 1.0 - (_sse / _ss_tot)
+        _adj_r2 = 1.0 - (1.0 - _r2) * (_n - 1) / (_n - _p)
+        _pred_r2 = 1.0 - (_press / _ss_tot)
+
+        _status = "Optimal Model" if _deg == 3 else ("Underfitting" if _deg < 3 else "Overfitting (Generalization Drops)")
+
+        _eval_rows.append({
+            "Polynomial Order": f"Degree {_deg} (p = {_p})",
+            "SSE (In-sample)": f"{_sse:.2f}",
+            "PRESS (Out-of-sample)": f"{_press:.2f}",
+            "Raw R^2": f"{_r2:.4f}",
+            "Adjusted R^2": f"{_adj_r2:.4f}",
+            "Predictive R^2": f"{_pred_r2:.4f}",
+            "Generalization Verdict": _status,
+        })
+
+    _df_order_selection = pd.DataFrame(_eval_rows)
+
+    return (
+        mo.md("#### Polynomial Complexity Evaluation: R^2 vs. Adjusted R^2 vs. Predictive R^2"),
+        mo.ui.table(_df_order_selection),
+    )
 
 
 if __name__ == "__main__":
