@@ -411,6 +411,7 @@ PROCESSED_NOTES: list[str] = [
     "62_grammar_of_graphics.py",
     "63_einsum.py",
     "64_pivoting.py",
+    "65_cudf.py",
 ]
 
 
