@@ -404,6 +404,7 @@ PROCESSED_NOTES: list[str] = [
     "55_perplexity.py",
     "56_reparametrization_trick.py",
     "57_autoencoder_latent_space.py",
+    "58_pca_for_anomaly_detection.py",
 ]
 
 
