@@ -353,6 +353,7 @@ PROCESSED_NOTES: list[str] = [
     "04_rank_one_matrices.py",
     "05_orthogonality.py",
     "06_moore_penrose_inverse.py",
+    "07_spectral_decomposition.py",
 ]
 
 
