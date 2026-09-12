@@ -154,7 +154,9 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ## [c] Interactive Visualizations: Quadratic Form Geometry and Spectral Equivalence
+    ## [c] Code Examples
+
+    ### Example 1: Interactive Visualizations: Quadratic Form Geometry and Spectral Equivalence
 
     The interactive subplots below display the dual perspective of spectral decomposition:
     * **Left Panel**: Transformation of the unit circle under a 2D symmetric positive definite matrix $\mathbf{S}$. The eigenvectors $\mathbf{q}_1, \mathbf{q}_2$ define the principal axes of the resulting ellipse, scaled by $\lambda_1, \lambda_2$.
@@ -351,9 +353,7 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ## [d] Code Examples
-
-    ### Example 1: Numerical Verification of Spectral Theorem and Gram Equivalence
+    ### Example 2: Numerical Verification of Spectral Theorem and Gram Equivalence
 
     Below, we generate a rectangular matrix $\mathbf{A} \in \mathbb{R}^{5 \times 3}$, construct its Gram matrices $\mathbf{A}^T\mathbf{A}$ and $\mathbf{A}\mathbf{A}^T$, and verify:
     1. Reconstruction of the symmetric matrix from eigenvalues and eigenvectors: $\mathbf{Q} \mathbf{\Lambda} \mathbf{Q}^T = \mathbf{S}$
@@ -443,7 +443,7 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ### Example 2: Spectral Graph Partitioning via the Fiedler Vector
+    ### Example 3: Spectral Graph Partitioning via the Fiedler Vector
 
     In spectral graph theory and Graph Neural Networks, community detection is performed by computing the eigendecomposition of the **Graph Laplacian**:
 
@@ -533,6 +533,25 @@ def _(mo, pd, graph_summary):
     df_graph = pd.DataFrame(graph_summary)
     mo.ui.table(df_graph)
     return (df_graph,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ---
+
+    ## [d] Takeaway
+
+    * **Spectral Theorem**: Every real symmetric matrix $\mathbf{S}$ can be diagonalized by an orthogonal matrix $\mathbf{Q}$ and purely real eigenvalues $\mathbf{\Lambda}$. Geometrically, $\mathbf{S}$ acts by stretching vectors along mutually perpendicular principal axes.
+    * **Positive Semi-Definiteness**: A symmetric matrix is PSD ($\mathbf{x}^T \mathbf{S} \mathbf{x} \ge 0$) if and only if all its eigenvalues are non-negative.
+    * **Gram Matrices**: The matrices $\mathbf{A}^T \mathbf{A}$ and $\mathbf{A}\mathbf{A}^T$ are unconditionally symmetric and PSD for any rectangular matrix $\mathbf{A}$.
+    * **The SVD Bridge**: The eigenvectors of $\mathbf{A}^T \mathbf{A}$ and $\mathbf{A}\mathbf{A}^T$ exactly form the right ($\mathbf{V}$) and left ($\mathbf{U}$) singular vectors of $\mathbf{A}$, while their non-zero eigenvalues are the squared singular values $\sigma_i^2$.
+
+    ---
+
+    &larr; Previous Note: [06 Moore-Penrose Pseudoinverse](06_moore_penrose_inverse.py) | Next Note: [08 Matrix Calculus](08_matrix_calculus_short.py) &rarr;
+    """)
+    return
 
 
 if __name__ == "__main__":

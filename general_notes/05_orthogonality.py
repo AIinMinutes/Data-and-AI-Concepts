@@ -66,6 +66,8 @@ def _(mo):
 
     Similarly, $\mathbf{Q}\mathbf{Q}^T = \mathbf{I}_n$ establishes that the rows of $\mathbf{Q}$ also form an orthonormal basis.
 
+    **Product of Orthogonal Matrices**: If $\mathbf{Q}_1$ and $\mathbf{Q}_2$ are orthogonal matrices, their product $\mathbf{Q}_1 \mathbf{Q}_2$ is also orthogonal because $(\mathbf{Q}_1 \mathbf{Q}_2)^T (\mathbf{Q}_1 \mathbf{Q}_2) = \mathbf{Q}_2^T \mathbf{Q}_1^T \mathbf{Q}_1 \mathbf{Q}_2 = \mathbf{Q}_2^T \mathbf{I} \mathbf{Q}_2 = \mathbf{I}$.
+
     ---
 
     ### The Isometry Property: Preservation of Lengths and Angles
@@ -196,7 +198,9 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ## [c] Interactive Visualization: Rotation vs Reflection
+    ## [c] Code Examples
+
+    ### Example 1: Interactive Visualization: Rotation vs Reflection
 
     The interactive subplots below demonstrate the geometric effect of 2D orthogonal transformations:
     * **Left Panel**: Pure rotation ($\theta = 60^\circ$, $\det(\mathbf{Q}) = +1$), preserving basis orientation.
@@ -470,9 +474,7 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ## [d] Code Examples
-
-    ### Example 1: Numerical Verification of Orthogonality and Isometry Properties
+    ### Example 2: Numerical Verification of Orthogonality and Isometry Properties
 
     Below, we generate a random $4 \times 4$ orthogonal matrix using QR decomposition and verify:
     1. $\mathbf{Q}^T \mathbf{Q} = \mathbf{I}$
@@ -568,7 +570,7 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ### Example 2: 2D Rotary Position Embedding (RoPE) Invariance
+    ### Example 3: 2D Rotary Position Embedding (RoPE) Invariance
 
     We implement a minimal 2D RoPE rotation block. We demonstrate that when query $\mathbf{q}$ is at position $m$ and key $\mathbf{k}$ is at position $n$, the attention inner product $\langle \mathbf{R}_m \mathbf{q}, \mathbf{R}_n \mathbf{k} \rangle$ depends solely on the relative offset $(n - m)$, regardless of absolute positions.
     """)
@@ -647,6 +649,25 @@ def _(mo, pd, rope_summary):
     df_rope = pd.DataFrame(rope_summary)
     mo.ui.table(df_rope)
     return (df_rope,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ---
+
+    ## [d] Takeaway
+
+    * **Geometric Invariance**: Orthogonal matrices $\mathbf{Q}$ ($\mathbf{Q}^T \mathbf{Q} = \mathbf{I}$) represent isometries that strictly preserve vector lengths, inner products, and angles.
+    * **Rotations vs Reflections**: The determinant dictates orientation. Rotations have $\det(\mathbf{Q}) = +1$, while reflections have $\det(\mathbf{Q}) = -1$.
+    * **Modern NLP**: Rotary Position Embeddings (RoPE) exploit the multiplicative properties of rotation matrices to encode relative token distances directly into attention scores.
+    * **Numerical Stability**: Orthogonal operators have a condition number of 1. They prevent exploding gradients during network initialization and provide unconditionally stable least-squares solvers via QR factorization.
+
+    ---
+
+    &larr; Previous Note: [04 Rank-One Matrices](04_rank_one_matrices.py) | Next Note: [06 Moore-Penrose Pseudoinverse](06_moore_penrose_inverse.py) &rarr;
+    """)
+    return
 
 
 if __name__ == "__main__":

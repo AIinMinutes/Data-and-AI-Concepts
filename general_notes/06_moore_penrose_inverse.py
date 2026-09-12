@@ -173,7 +173,9 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ## [c] Interactive Visualizations: Overdetermined vs Underdetermined Systems
+    ## [c] Code Examples
+
+    ### Example 1: Interactive Visualizations: Overdetermined vs Underdetermined Systems
 
     The two figures below illustrate the geometric duality of the pseudoinverse:
     1. **Overdetermined System (3D)**: Target vector $\mathbf{b}$ projected orthogonally onto the 2D column space $\text{col}(\mathbf{A})$. The residual $\mathbf{r} = \mathbf{b} - \mathbf{A}\mathbf{x}^+$ is strictly perpendicular to the plane.
@@ -415,9 +417,7 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ## [d] Code Examples
-
-    ### Example 1: Numerical Verification of the Four Penrose Conditions
+    ### Example 2: Numerical Verification of the Four Penrose Conditions
 
     Below, we construct a rank-deficient rectangular matrix $\mathbf{A} \in \mathbb{R}^{4 \times 3}$ with rank 2. We construct its pseudoinverse using both SVD and NumPy's `np.linalg.pinv`, verifying:
     1. $\mathbf{A}\mathbf{A}^+\mathbf{A} = \mathbf{A}$
@@ -519,7 +519,7 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ### Example 2: Minimum-Norm Verification for Underdetermined Systems
+    ### Example 3: Minimum-Norm Verification for Underdetermined Systems
 
     Consider an underdetermined system with $m = 3$ equations and $n = 10$ parameters. Infinitely many solutions $\mathbf{w}$ satisfy $\mathbf{X}\mathbf{w} = \mathbf{y}$.
 
@@ -628,6 +628,25 @@ def _(mo, pd, underdetermined_summary):
     df_under = pd.DataFrame(underdetermined_summary)
     mo.ui.table(df_under)
     return (df_under,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ---
+
+    ## [d] Takeaway
+
+    * **Universal Solver**: The Moore-Penrose pseudoinverse $\mathbf{A}^+$ provides a unique solution $\mathbf{x} = \mathbf{A}^+ \mathbf{b}$ for any system, regardless of whether it is full-rank, overdetermined, or underdetermined.
+    * **Dual Optimality**: For overdetermined systems, it strictly minimizes the residual error (Least-Squares). For underdetermined systems, it strictly minimizes the parameter norm (Minimum-Norm).
+    * **SVD Construction**: $\mathbf{A}^+$ can always be reliably computed using the Singular Value Decomposition (SVD) by reciprocating the non-zero singular values.
+    * **Implicit Bias in ML**: Gradient descent on overparameterized models initialized at zero implicitly converges to the pseudoinverse minimum-norm solution, serving as a form of implicit regularization.
+
+    ---
+
+    &larr; Previous Note: [05 Orthogonality](05_orthogonality.py) | Next Note: [07 Spectral Decomposition](07_spectral_decomposition.py) &rarr;
+    """)
+    return
 
 
 if __name__ == "__main__":

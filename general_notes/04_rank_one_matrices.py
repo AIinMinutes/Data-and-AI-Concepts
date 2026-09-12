@@ -44,6 +44,12 @@ def _(mo):
 
     ## [b] Concept explanation with their role in ML/AI/Stats?
 
+    ### Rank of a Matrix
+
+    The **rank** of a matrix $\mathbf{A}_{m \times n}$, denoted $\text{rank}(\mathbf{A})$, is the maximal number of linearly independent rows or columns in the matrix. Key properties include:
+    * $\text{rank}(\mathbf{A}) \leq \min(m, n)$
+    * Row rank always equals Column rank.
+
     ### Definition of a Rank-One Matrix
 
     A non-zero matrix $\mathbf{A} \in \mathbb{R}^{m \times n}$ has rank 1 if and only if it can be written as the **outer product** of two non-zero vectors $\mathbf{u} \in \mathbb{R}^m$ and $\mathbf{v} \in \mathbb{R}^n$:
@@ -108,11 +114,13 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ## [c] Code examples
+    ## [c] Code Examples
 
     Below are two concrete implementations:
     1. **Rank-1 Outer Product & SVD Decomposition**: Constructing an outer product from scratch, inspecting properties, and verifying exact additive SVD reconstruction on a $3 \times 2$ matrix.
     2. **Low-Rank Image / Surface Reconstruction**: Synthesizing a 2D surface pattern and interactively visualizing its progressive rank-$k$ approximations via Plotly.
+
+    ### Example 1: Rank-1 Mechanics and SVD
     """)
     return
 
@@ -163,6 +171,14 @@ def _(np):
         rank1_comp_2,
         reconstruction_error,
     )
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Example 2: Interactive Low-Rank Surface Approximation
+    """)
+    return
 
 
 @app.cell
@@ -246,11 +262,6 @@ def _(mo):
 
     &larr; Previous Note: [03 Hyperplanes](03_hyperplanes.py) | Next Note: [05 Orthogonality](05_orthogonality.py) &rarr;
     """)
-    return
-
-
-@app.cell
-def _():
     return
 
 

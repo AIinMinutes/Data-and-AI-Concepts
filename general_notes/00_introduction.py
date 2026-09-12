@@ -15,6 +15,47 @@ def _():
 
 @app.cell(hide_code=True)
 def _(mo):
+    mo.Html(
+        """
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fira+Code&display=swap');
+
+        /* Core Typography */
+        html, body, .marimo {
+            font-family: 'Inter', sans-serif !important;
+            background-color: #ffffff !important;
+            color: #1a1a1a !important;
+            line-height: 1.75 !important;
+        }
+
+        /* Headings */
+        h1, h2, h3, h4 {
+            font-weight: 600 !important;
+            color: #000000 !important;
+            letter-spacing: -0.02em !important;
+        }
+        h1 { font-size: 2.25rem !important; margin-bottom: 1.5rem !important; }
+        h2 { font-size: 1.5rem !important; margin-top: 3rem !important; }
+
+        /* Code blocks */
+        pre, code {
+            font-family: 'Fira Code', monospace !important;
+            font-size: 0.9em !important;
+        }
+
+        /* Whitespace and margins for readability */
+        .prose {
+            max-width: 65ch !important;
+            margin: 0 auto !important;
+        }
+        </style>
+        """
+    )
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
     mo.md(r"""
     # Note 00: Systems of Linear Equations and Vector Foundations
 
@@ -125,9 +166,11 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ## [c] Code examples
+    ## [c] Code Examples
 
-    The following code sets up the fruit pricing problem, validates invertibility, computes the unknown prices, and visualizes the intersection of the constraints using Plotly.
+    ### Example 1: Solving a 2x2 System (Unique Solution)
+
+    A vendor observes two purchase scenarios: (40 apples, 6 bananas) totaling 100 currency units, and (20 apples, 8 bananas) totaling 80 currency units. We solve for the unknown per-unit prices $x_1$ (apple) and $x_2$ (banana) using the matrix equation $\mathbf{A}^T \mathbf{x} = \mathbf{c}$, verify invertibility via the determinant, and visualize the constraint lines whose intersection is the unique solution.
     """)
     return
 
@@ -225,6 +268,101 @@ def _(A, c, go, np, x_solution):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
+    ### Example 2: Overdetermined System (Least-Squares Approximation)
+
+    In practice, we often have more observations (equations) than unknowns. A vendor records **three** purchase scenarios but there are still only two unknown prices. The system $\mathbf{A}^T \mathbf{x} = \mathbf{c}$ is now overdetermined and generally has no exact solution.
+
+    The **least-squares solution** minimizes the squared residual $\|\mathbf{A}^T \mathbf{x} - \mathbf{c}\|_2^2$. This is the foundation of Ordinary Least Squares (OLS) regression:
+
+    $$
+    \hat{\mathbf{x}} = (\mathbf{A} \mathbf{A}^T)^{-1} \mathbf{A} \, \mathbf{c}
+    $$
+
+    NumPy's `np.linalg.lstsq` computes this via the numerically stable SVD decomposition rather than forming the normal equations explicitly.
+    """)
+    return
+
+
+@app.cell
+def _(np):
+    # Three purchase scenarios (overdetermined: 3 equations, 2 unknowns)
+    # Scenario 1: 40 apples, 6 bananas = 100
+    # Scenario 2: 20 apples, 8 bananas = 80
+    # Scenario 3: 10 apples, 3 bananas = 49 (slightly noisy observation)
+    A_over = np.array([[40.0, 20.0, 10.0], [6.0, 8.0, 3.0]])
+    c_over = np.array([100.0, 80.0, 49.0])
+
+    # Least-squares solution via SVD
+    x_lstsq, residuals, rank, sv = np.linalg.lstsq(A_over.T, c_over, rcond=None)
+
+    # Normal equations solution for comparison
+    x_normal = np.linalg.solve(A_over @ A_over.T, A_over @ c_over)
+
+    {
+        "lstsq_solution": x_lstsq.tolist(),
+        "normal_eq_solution": x_normal.tolist(),
+        "residual_norm_squared": float(np.sum((A_over.T @ x_lstsq - c_over) ** 2)),
+        "matrix_rank": int(rank),
+        "match": bool(np.allclose(x_lstsq, x_normal)),
+    }
+    return
+
+
+@app.cell
+def _(A_over, c_over, go, np):
+    # Least-squares solution for plotting
+    _x_ls, _, _, _ = np.linalg.lstsq(A_over.T, c_over, rcond=None)
+
+    x1_grid = np.linspace(0, 5, 200)
+
+    fig_over = go.Figure()
+
+    labels = [
+        f"Scenario 1: {A_over[0,0]:.0f}x\u2081 + {A_over[1,0]:.0f}x\u2082 = {c_over[0]:.0f}",
+        f"Scenario 2: {A_over[0,1]:.0f}x\u2081 + {A_over[1,1]:.0f}x\u2082 = {c_over[1]:.0f}",
+        f"Scenario 3: {A_over[0,2]:.0f}x\u2081 + {A_over[1,2]:.0f}x\u2082 = {c_over[2]:.0f}",
+    ]
+    colors = ["#1f77b4", "#ff7f0e", "#2ca02c"]
+
+    for k in range(3):
+        x2_line = (c_over[k] - A_over[0, k] * x1_grid) / A_over[1, k]
+        fig_over.add_trace(
+            go.Scatter(
+                x=x1_grid, y=x2_line, mode="lines",
+                name=labels[k], line=dict(color=colors[k], width=2.5),
+            )
+        )
+
+    fig_over.add_trace(
+        go.Scatter(
+            x=[_x_ls[0]], y=[_x_ls[1]], mode="markers+text",
+            name=f"Least-Squares Solution ({_x_ls[0]:.2f}, {_x_ls[1]:.2f})",
+            text=[f"  LS Solution ({_x_ls[0]:.2f}, {_x_ls[1]:.2f})"],
+            textposition="top right",
+            marker=dict(color="#d62728", size=11, symbol="diamond"),
+        )
+    )
+
+    fig_over.update_layout(
+        title=dict(
+            text="Overdetermined System: Three Constraints, Least-Squares Compromise",
+            font=dict(size=14),
+        ),
+        xaxis=dict(title="Price per Apple (x\u2081)", range=[0, 5], zeroline=True, gridcolor="#e5e5e5"),
+        yaxis=dict(title="Price per Banana (x\u2082)", range=[0, 18], zeroline=True, gridcolor="#e5e5e5"),
+        template="plotly_white",
+        legend=dict(x=0.45, y=0.98),
+        width=720,
+        height=480,
+    )
+
+    fig_over
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
     ---
 
     ## [d] Takeaway
@@ -232,17 +370,13 @@ def _(mo):
     * **Geometric Meaning**: Each linear equation represents a hyperplane of constraints. Solving the system corresponds to finding the intersection point satisfying all constraints simultaneously.
     * **Matrix Formulation**: Grouping quantities and observations into matrices turns a set of simultaneous equations into a compact matrix multiplication problem.
     * **Invertibility and Determinants**: A unique solution exists if and only if the matrix determinant is non-zero, indicating that the equations are linearly independent.
-    * **Computational Practice**: While matrix inversion ($\mathbf{A}^{-1}$) is theoretically convenient, numerical solvers like `np.linalg.solve` should always be preferred in practice for speed and stability.
+    * **Overdetermined Systems**: When there are more equations than unknowns, the system is generally inconsistent. The least-squares solution minimizes the total squared error across all constraints, forming the mathematical foundation of linear regression.
+    * **Computational Practice**: While matrix inversion ($\mathbf{A}^{-1}$) is theoretically convenient, numerical solvers like `np.linalg.solve` and `np.linalg.lstsq` should always be preferred in practice for speed and stability.
 
     ---
 
     Next Note: [01 Inner Products](01_inner_product.py) &rarr;
     """)
-    return
-
-
-@app.cell
-def _():
     return
 
 

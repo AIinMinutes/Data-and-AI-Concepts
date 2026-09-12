@@ -207,7 +207,9 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ## [c] Interactive Visualizations: Loss Surface Geometry and Gradient Orthogonality
+    ## [c] Code Examples
+
+    ### Example 1: Interactive Visualizations: Loss Surface Geometry and Gradient Orthogonality
 
     The interactive subplots below demonstrate the fundamental geometry of matrix calculus:
     * **Left Panel**: 2D level contours of the quadratic loss $f(\mathbf{x}) = \frac{1}{2} \mathbf{x}^T \mathbf{A} \mathbf{x} - \mathbf{b}^T \mathbf{x}$. At the probe point $\mathbf{x}_0$, the gradient $\nabla f$ is strictly orthogonal to the level contour tangent line. The red trajectory shows Gradient Descent steps converging to the analytical optimum $\mathbf{x}^* = \mathbf{A}^{-1}\mathbf{b}$.
@@ -496,9 +498,7 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ## [d] Code Examples
-
-    ### Example 1: Numerical and PyTorch Autograd Verification of the 5 Core Rules
+    ### Example 2: Numerical and PyTorch Autograd Verification of the 5 Core Rules
 
     In this example, we verify each of the five foundational matrix calculus rules by evaluating:
     1. The exact analytical expression derived via matrix calculus.
@@ -648,7 +648,7 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ### Example 2: Training Linear Regression with Analytical Matrix Calculus vs PyTorch Autograd
+    ### Example 3: Training Linear Regression with Analytical Matrix Calculus vs PyTorch Autograd
 
     In this example, we generate a synthetic regression dataset with $N = 80$ samples and $d = 3$ features:
 
@@ -754,6 +754,25 @@ def _(mo, optimization_records, pd):
     df_optimization = pd.DataFrame(optimization_records)
     mo.ui.table(df_optimization)
     return (df_optimization,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ---
+
+    ## [d] Takeaway
+
+    * **Gradients vs Jacobians**: Gradients apply to scalar-valued functions and define the direction of steepest ascent (orthogonal to level contours). Jacobians apply to vector-valued functions and serve as the optimal local linear approximation matrix.
+    * **The 5 Core Rules**: Mastering the derivatives of linear forms, quadratic forms, bilinear forms, and matrix inner products allows for rapid algebraic derivation of complex estimators (like the OLS Normal Equations) without falling back on tedious scalar summation algebra.
+    * **Backpropagation = VJP**: Deep learning relies on reverse-mode automatic differentiation, which sequentially computes Vector-Jacobian Products (VJPs) rather than instantiating massive Jacobian matrices in memory.
+    * **Hessian Curvature**: The symmetric Hessian matrix ($\nabla^2 f$) captures local curvature. A positive definite Hessian ensures the optimization landscape is strictly convex, guaranteeing that a critical point is a unique global minimum.
+
+    ---
+
+    &larr; Previous Note: [07 Spectral Decomposition](07_spectral_decomposition.py) | Next Note: [09 Condition Number](09_condition_number.py) &rarr;
+    """)
+    return
 
 
 if __name__ == "__main__":

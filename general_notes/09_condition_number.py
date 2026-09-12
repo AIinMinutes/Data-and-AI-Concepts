@@ -178,7 +178,9 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ## [c] Interactive Visualizations: Geometric Sensitivity and Regularization Dynamics
+    ## [c] Code Examples
+
+    ### Example 1: Interactive Visualizations: Geometric Sensitivity and Regularization Dynamics
 
     The interactive subplots below display the dual facets of conditioning:
     * **Left Panel**: Geometric demonstration of error magnification in an ill-conditioned linear system ($\kappa \approx 82$). Two nearly parallel lines intersect at $\mathbf{x}^* = [1.0, 1.0]^T$. An imperceptible $+2.4\%$ perturbation to $b_2$ causes the intersection point to fly across the coordinate plane to $\mathbf{x}_{\text{pert}} = [0.0, 2.0]^T$, yielding a displacement $\|\Delta\mathbf{x}\| = 1.414$ ($29\times$ amplification).
@@ -400,9 +402,7 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ## [d] Code Examples
-
-    ### Example 1: Numerical Verification of the Relative Perturbation Bound
+    ### Example 2: Numerical Verification of the Relative Perturbation Bound
 
     In this example, we construct an ill-conditioned matrix $\mathbf{A} \in \mathbb{R}^{4 \times 4}$ with a pre-specified condition number $\kappa_2(\mathbf{A}) = 10,000$ using Singular Value Decomposition:
 
@@ -500,7 +500,7 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ### Example 2: Multicollinearity Diagnostics, Variance Inflation, and Ridge Healing
+    ### Example 3: Multicollinearity Diagnostics, Variance Inflation, and Ridge Healing
 
     In this example, we generate a synthetic regression dataset ($N = 100$) with predictors:
     * $x_1 \sim \mathcal{N}(50, 15^2)$
@@ -676,6 +676,25 @@ def _(mo, multicollinearity_comparison, pd):
     df_comparison = pd.DataFrame(multicollinearity_comparison)
     mo.ui.table(df_comparison)
     return (df_comparison,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ---
+
+    ## [d] Takeaway
+
+    * **Condition Number $\kappa$**: Measures the sensitivity of a linear system to perturbations. A high $\kappa$ means small input errors or round-off errors get massively amplified in the solution.
+    * **Condition Squaring**: In OLS, solving the Normal Equations squares the condition number of the design matrix: $\kappa(\mathbf{X}^T\mathbf{X}) = \kappa(\mathbf{X})^2$. This is why SVD or QR factorization is preferred over explicit matrix inversion for collinear data.
+    * **Multicollinearity & VIF**: High condition numbers ($\kappa > 30$) or High Variance Inflation Factors ($\text{VIF}_j > 10$) indicate severe multicollinearity, causing parameter variance to explode and making hypothesis tests unreliable.
+    * **Ridge Regularization**: Adding an $L_2$ penalty $\lambda$ strictly bounds the minimum eigenvalue away from zero ($\sigma_{\min}^2 + \lambda$), safely artificially lowering the condition number and stabilizing parameter estimates at the cost of a little bias.
+
+    ---
+
+    &larr; Previous Note: [08 Matrix Calculus](08_matrix_calculus_short.py) | Next Note: [10 Chebyshev Inequality](10_chebyshev_inequality.py) &rarr;
+    """)
+    return
 
 
 if __name__ == "__main__":

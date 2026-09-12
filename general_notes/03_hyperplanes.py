@@ -70,6 +70,17 @@ def _(mo):
 
     In binary classification, the decision rule assigns class labels according to the sign of the linear score: $\hat{y} = \text{sgn}(\mathbf{w}^T \mathbf{x} + b)$.
 
+    ### Vector and Scalar Projections
+
+    Before deriving point-to-plane distance, recall how vectors project onto one another. The **vector projection** of $\mathbf{v}$ onto $\mathbf{w}$ is:
+    $$
+    \text{proj}_{\mathbf{w}} \mathbf{v} = \frac{\mathbf{v}^T \mathbf{w}}{\|\mathbf{w}\|_2^2} \mathbf{w}
+    $$
+    The **scalar projection** (the length of the projection along $\mathbf{w}$) is:
+    $$
+    \text{comp}_{\mathbf{w}} \mathbf{v} = \frac{\mathbf{v}^T \mathbf{w}}{\|\mathbf{w}\|_2}
+    $$
+
     ### Orthogonal Distance from a Point to a Hyperplane
 
     Let $\mathbf{x}_0 \in \mathbb{R}^n$ be an arbitrary observation, and let $\mathbf{x}_p \in H$ be its orthogonal projection onto $H$. The displacement vector $\mathbf{x}_0 - \mathbf{x}_p$ is collinear with the unit normal vector $\hat{\mathbf{w}} = \frac{\mathbf{w}}{\|\mathbf{w}\|_2}$:
@@ -132,11 +143,13 @@ def _(mo):
     mo.md(r"""
     ---
 
-    ## [c] Code examples
+    ## [c] Code Examples
 
     Below are two practical examples:
     1. **Numerical Verification**: Computing perpendicular distances from arbitrary points to a hyperplane and calculating the separation distance between parallel planes.
     2. **Interactive 3D Visualization**: Visualizing parallel hyperplanes, their shared normal vector, and the orthogonal separation distance with Plotly.
+
+    ### Example 1: Numerical Verification of Distances
     """)
     return
 
@@ -175,6 +188,14 @@ def _(np):
         "euclidean_displacement": euclidean_displacement
     }
     return b1, b2, w, w_norm, x_on_p1, x_proj_on_p2
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Example 2: Interactive 3D Plotly Visualization
+    """)
+    return
 
 
 @app.cell
@@ -261,11 +282,6 @@ def _(mo):
 
     &larr; Previous Note: [02 Norm and Metric](02_norm_and_metric.py) | Next Note: [04 Rank-One Matrices](04_rank_one_matrices.py) &rarr;
     """)
-    return
-
-
-@app.cell
-def _():
     return
 
 

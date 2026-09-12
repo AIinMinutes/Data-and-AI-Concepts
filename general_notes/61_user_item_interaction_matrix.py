@@ -16,10 +16,14 @@ def _():
 
 @app.cell(hide_code=True)
 def _(mo):
-    return mo.md(r"""
-    # User-Item Interaction Matrix
+    mo.md(r\"\"\"
+    # Note 61: User-Item Interaction Matrix
 
-    [← 60 VAE Anomaly Detection](60_vae_anomaly_detection.py) | [Index](../index.html) | [62 Grammar of Graphics →](../random_notes/62_grammar_of_graphics.py)
+    &larr; Previous Note: [60 VAE Anomaly Detection](60_vae_anomaly_detection.py) | [Index](../index.html) | Next Note: [62 Grammar of Graphics](../random_notes/62_grammar_of_graphics.py) &rarr;
+
+    ---
+
+    ## [a] Why do you need to know these concepts?
 
     The **user-item interaction matrix** is the foundational structure underlying collaborative filtering, recommender systems, and bipartite graph analytics. In real-world platforms (e-commerce, streaming services, social networks), users interact with subsets of a large catalog of items. These interactions can be **explicit** (numerical ratings, upvotes) or **implicit** (page views, clicks, purchases, dwell time).
 
@@ -29,13 +33,25 @@ def _(mo):
     - Cosine and Jaccard similarity normalizations
     - Low-rank matrix factorization via Truncated Singular Value Decomposition (SVD) and the Eckart-Young-Mirsky theorem
     - Shared latent embedding spaces unifying users and items
-    """)
+    \"\"\")
+    return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    return mo.md(r"""
-    ## Mathematical Formulation
+    mo.md(r\"\"\"
+    ---
+
+    ## [b] Concept explanation with their role in ML/AI/Stats?
+
+    ### Role in Machine Learning, AI, and Statistics
+
+    The user-item matrix is the primary data structure for **Collaborative Filtering** and modern **Recommender Systems**:
+    * **Matrix Factorization (ALS & SGD)**: To handle extreme sparsity, machine learning models decompose the matrix into lower-dimensional user and item embeddings. Algorithms like Alternating Least Squares (ALS) and Stochastic Gradient Descent (SGD) optimize over only the observed interactions.
+    * **Two-Tower Neural Networks**: In deep learning architectures (like the YouTube recommendation system), user and item features are independently passed through neural networks (towers) to produce dense embeddings in a shared latent space, which are then scored using an inner product, effectively approximating the user-item matrix.
+    * **Graph Neural Networks (GNNs)**: The bipartite graph representation allows GNNs (like LightGCN) to propagate embeddings iteratively between users and items, capturing higher-order network connectivity.
+
+    ### Mathematical Formulation
 
     Let $\mathcal{U} = \{u_1, u_2, \dots, u_m\}$ denote a set of $m$ users and $\mathcal{V} = \{v_1, v_2, \dots, v_n\}$ denote a set of $n$ items. The interaction matrix is defined as:
 
@@ -58,7 +74,8 @@ def _(mo):
     $$
 
     In production systems, $S$ routinely exceeds $99\%$, necessitating sparse linear algebra (Compressed Sparse Row/Column formats) and specialized factorization algorithms.
-    """)
+    \"\"\")
+    return
 
 
 @app.cell
@@ -126,6 +143,7 @@ def _(go, item_names, mo, n_items, n_users, nnz, R, sparsity_ratio, user_names):
     )
 
     _md = mo.md(
+        f"--- \n\n## [c] Interactive Visualizations\n\n"
         f"### Interaction Matrix Visualization\n\n"
         f"Total elements: **{n_users * n_items}** | "
         f"Non-zero interactions ($\\|R\\|_0$): **{nnz}** | "
@@ -137,7 +155,7 @@ def _(go, item_names, mo, n_items, n_users, nnz, R, sparsity_ratio, user_names):
 
 @app.cell(hide_code=True)
 def _(mo):
-    return mo.md(r"""
+    mo.md(r\"\"\"
     ---
 
     ## Bipartite Graph Formulation & Adjacency Representation
@@ -154,12 +172,13 @@ def _(mo):
     $$
 
     The graph degree matrix is $D = \operatorname{diag}(d_1, \dots, d_{m+n})$, where user degrees equal row sums $\sum_j R_{ij}$ and item degrees equal column sums $\sum_i R_{ij}$.
-    """)
+    \"\"\")
+    return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    return mo.md(r"""
+    mo.md(r\"\"\"
     ---
 
     ## Dual Projections: User-User and Item-Item Geometries
@@ -201,7 +220,8 @@ def _(mo):
     $$
     S_V^{\text{cos}}(j, l) = \frac{(R^T R)_{jl}}{\sqrt{(R^T R)_{jj} (R^T R)_{ll}}}
     $$
-    """)
+    \"\"\")
+    return
 
 
 @app.cell
@@ -306,10 +326,12 @@ def _(
 
 @app.cell(hide_code=True)
 def _(mo):
-    return mo.md(r"""
+    mo.md(r\"\"\"
     ---
 
-    ## Low-Rank Matrix Factorization & SVD
+    ## [d] Code Examples
+
+    ### Low-Rank Matrix Factorization & SVD
 
     In recommender systems, user tastes and item attributes are driven by a small number $k \ll \min(m, n)$ of **unobserved latent factors** (e.g., genre preferences, tone, pace).
 
@@ -349,7 +371,8 @@ def _(mo):
     $$
     \|R - \hat{R}_k\|_F^2 = \sum_{r=k+1}^{\min(m,n)} \sigma_r^2
     $$
-    """)
+    \"\"\")
+    return
 
 
 @app.cell
@@ -555,10 +578,10 @@ def _(go, item_names, mo, P_2, Q_2, user_names):
 
 @app.cell(hide_code=True)
 def _(mo):
-    return mo.md(r"""
+    mo.md(r\"\"\"
     ---
 
-    ## Key Takeaways and Engineering Considerations
+    ## [e] Takeaway
 
     1. **Bipartite Duality**:
        - The interaction matrix $R$ encodes edges between disjoint sets $\mathcal{U}$ and $\mathcal{V}$.
@@ -569,7 +592,8 @@ def _(mo):
     3. **The Cold-Start Problem**:
        - Pure interaction matrices suffer when new users or items with zero historical rows/columns join the system ($\|r_{\text{new}}\|_0 = 0$).
        - Hybrid recommenders bridge this gap by concatenating content features (metadata, embeddings) with interaction matrices.
-    """)
+    \"\"\")
+    return
 
 
 if __name__ == "__main__":

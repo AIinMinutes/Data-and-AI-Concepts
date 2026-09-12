@@ -60,6 +60,20 @@ def _(mo):
     \langle \mathbf{u}, \mathbf{v} \rangle = \mathbf{u} \cdot \mathbf{v} = \sum_{i=1}^n u_i v_i = \mathbf{u}^T \mathbf{v}
     $$
 
+    ### Beyond Euclidean Space
+
+    The inner product generalizes beyond real coordinate spaces:
+
+    - **Complex Inner Product ($\mathbb{C}^n$)**: To maintain positive definiteness, one vector is complex conjugated:
+      $$
+      \langle \mathbf{u}, \mathbf{v} \rangle = \sum_{i=1}^n \overline{u}_i v_i = \mathbf{u}^H \mathbf{v}
+      $$
+    - **Function Spaces ($L^2$)**: For square-integrable functions over $[a,b]$, the inner product is a continuous sum (integral):
+      $$
+      \langle f, g \rangle = \int_a^b f(x) \overline{g(x)} \, dx
+      $$
+      This generalization is the foundation of Fourier series and functional analysis.
+
     ### What the Inner Product Unlocks
 
     From this single operation, we derive the entire geometric toolkit:
@@ -90,7 +104,13 @@ def _(mo):
 
     ### Role in Machine Learning: The Kernel Trick & SVMs
 
-    In the dual form of the soft-margin SVM, the optimization depends entirely on pairwise inner products:
+    In the **primal form** of the soft-margin Support Vector Machine, we minimize weights $\mathbf{w}$ and slack variables $\xi$ subject to margin constraints:
+
+    $$
+    \min_{\mathbf{w}, b, \xi} \frac{1}{2} \|\mathbf{w}\|^2 + C \sum_{i=1}^n \xi_i \quad \text{s.t.} \quad y_i(\mathbf{w} \cdot \mathbf{x}_i + b) \geq 1 - \xi_i
+    $$
+
+    By introducing Lagrange multipliers $\alpha$, we convert this into the **dual form**, where the optimization depends entirely on pairwise inner products of the data points, eliminating $\mathbf{w}$ entirely:
 
     $$
     \max_{\alpha} \sum_{i=1}^n \alpha_i - \frac{1}{2} \sum_{i,j} \alpha_i \alpha_j y_i y_j \langle \mathbf{x}_i, \mathbf{x}_j \rangle
